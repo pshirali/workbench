@@ -1,4 +1,6 @@
 #!/usr/bin/env bash -i
+
+
 # -----------------------------------------------------------------------------
 #
 # Copyright 2019 Praveen G Shirali <praveengshirali@gmail.com>
@@ -26,10 +28,47 @@ readonly _WORKBENCH_VERSION=0.0.1
 readonly _PROG="${0##*/}"
 
 
-_wb_do_vars () { set | egrep "^WORKBENCH_\w+=" | sort; }
+WORKBENCH_GREPPER="${WORKBENCH_GREPPER:-egrep}"
+
+
+_wb_consume_rcfile () {
+    local wbrc="${HOME}/.workbenchrc"
+    if [[ -z "${WORKBENCH_RC}" ]] && [[ ! -z "${HOME}" ]] && [[ -f "${wbrc}" ]]
+    then
+        WORKBENCH_RC="${wbrc}"
+    fi
+    if [[ ! -z ${WORKBENCH_RC} ]]; then
+        if [[ -f "${WORKBENCH_RC}" ]]; then
+            source "${WORKBENCH_RC}"
+        else
+            err "Can't find WORKBENCH_RC: '${WORKBENCH_RC}'"
+            exit 1
+        fi
+    fi
+}
+
+_wb_init_workbench_home () {
+    [[ -z "${WORKBENCH_HOME}" ]] && WORKBENCH_HOME="${HOME}/.workbench"
+    mkdir -p "${WORKBENCH_HOME}"
+    if [[ ! -d "${WORKBENCH_HOME}" ]]; then
+        err "WORKBENCH_HOME (${WORKBENCH_HOME}) does not exist. Quitting!"
+        exit 1
+    fi
+}
+
+
+_wb_do_vars () { set | ${WORKBENCH_GREPPER} "^WORKBENCH_\w+=" | sort; }
 
 
 main () {
+    _wb_consume_rcfile
+    WORKBENCH_HOME="$(echo ${WORKBENCH_HOME} | sed 's|/*$||g')"
+    _wb_init_workbench_home
+    if [[ -z "$1" ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+        _wb_show_help
+        exit 0
+    fi
+
     case "$1" in
         -V) log "${_WORKBENCH_VERSION}";;
         -E) _wb_do_vars;;
