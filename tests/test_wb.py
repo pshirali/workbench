@@ -3,7 +3,7 @@
 import subprocess
 import unittest
 
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, join, basename
 
 WB_DIR=abspath(join(dirname(__file__), ".."))
 TESTDATA=join(WB_DIR, "tests", "testdata")
@@ -27,6 +27,20 @@ def run(cmd, **kwargs):
     cp.stdout = cp.stdout.decode('utf-8')
     cp.stderr = cp.stderr.decode('utf-8')
     return cp
+
+
+def get_shelf_filename(home, shelf_name):
+    # https://docs.python.org/3.7/library/os.path.html#os.path.join
+    # If a component is an absolute path, all previous components are thrown
+    # away and joining continues from the absolute path component.
+    if shelf_name == "/":
+        shelf_name = ""
+    return join(home, shelf_name, "wb.shelf")
+
+
+def get_bench_filename(home, bench_name):
+    return join(home, "{}{}".format(bench_name, ".bench"))
+
 
 
 # -----------------------------------------------------------------------------
@@ -81,45 +95,90 @@ class TestWb(unittest.TestCase):
             self.assertTrue(entry.startswith("WORKBENCH_"))
         self.assertEqual(o.returncode, 0)
 
-    def _test_list(self, cmd_char, expected):
-        o = run("WORKBENCH_HOME={td}/wbhome {wb} {cmd_char}",
-                replace=dict(cmd_char=cmd_char))
-        expected = set(expected)
-        actual = set(o.stdout.strip().split('\n'))
-        self.assertEqual(expected, actual)
 
-    def _test_path(self, cmd_char, values):
-        wbhome = join(TESTDATA, "wbhome")
-        for value in values:
-            o = run("WORKBENCH_HOME={td}/wbhome {wb} {cmd_char} {value}",
-                    replace=dict(cmd_char=cmd_char, value=value))
-            actual = o.stdout.strip()
-            if cmd_char == "s":
-                # os.path.join: if a value is an absolute path (root)
-                # all previous values are discarded (in this case 'wbhome')
-                if value == "/":
-                    value = ""
-                expected = join(wbhome, value, "wb.shelf")
-            else:   #   == "b"
-                expected = join(wbhome, "{}{}".format(value, ".bench"))
-            self.assertEqual(expected, actual)
+    # LIST SHELVES AND BENCHES
 
-    def test_shelves(self):
-        SHELVES = [
-            "/", "A/", "A/A1/", "A/A2/"
+    def test_list_simple_benches(self):
+        o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} b")
+        benches = set(o.stdout.strip().split('\n'))
+        self.assertEqual(benches, set([
+            "outer/inner/simple1",
+            "outer/inner/simple2"
+        ]))
+
+    def test_list_simple_shelves(self):
+        o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} s")
+        benches = set(o.stdout.strip().split('\n'))
+        self.assertEqual(benches, set([
+            "/",
+            "outer/",
+            "outer/inner/"
+        ]))
+
+    # SHOW PATH TO SHELF AND BENCH FILES
+
+    def _test_print_path_to_file(self, wb_cmd, name):
+        get_filename = {
+            "s": get_shelf_filename,
+            "b": get_bench_filename
+        }
+        root_folder = join(TESTDATA, "wbhome", "simple")
+        filename = get_filename[wb_cmd](root_folder, name)
+
+        o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {wb_cmd} {name}",
+                replace=dict(wb_cmd=wb_cmd, name=name))
+        self.assertEqual(filename, o.stdout.strip())
+
+    def test_show_simple_bench_file(self):
+        self._test_print_path_to_file("b", "outer/inner/simple1")
+        self._test_print_path_to_file("b", "outer/inner/simple2")
+
+    def test_show_simple_shelf_path(self):
+        self._test_print_path_to_file("s", "/")
+        self._test_print_path_to_file("s", "outer/")
+        self._test_print_path_to_file("s", "outer/inner/")
+
+    # RUN COMMAND ON A SHELF AND BENCH FILE
+
+    def _test_command_on_file(self, wb_cmd, name):
+        get_filename = {
+            "s": get_shelf_filename,
+            "b": get_bench_filename
+        }
+        root_folder = join(TESTDATA, "wbhome", "simple")
+        filename = get_filename[wb_cmd](root_folder, name)
+
+        cmd = "head -n 1"
+        with open(filename) as f:
+            lines = f.read().split('\n')
+        self.assertTrue(len(lines) > 0)
+        self.assertTrue(lines[0] != "")
+        expected = lines[0]
+
+        o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {wb_cmd} {name} {cmd}",
+                replace=dict(wb_cmd=wb_cmd, name=name, cmd=cmd))
+        self.assertEqual(expected, o.stdout.strip())
+
+    def test_run_command_on_bench_file(self):
+        self._test_command_on_file("b", "outer/inner/simple1")
+
+    def test_run_command_on_shelf_file(self):
+        self._test_command_on_file("s", "outer/inner/")
+
+
+    # EXIT 1 ON INVALID INPUTS
+
+    def test_list_errors_on_bad_inputs(self):
+        bad_inputs = [
+            ("s", "invalid-shelf-missing-tailing-slash"),
+            ("s", "valid/but/non/existent/shelf/"),
+            ("b", "invalid-bench-having-tailing-slash/"),
+            ("b", "valid/but/non/existent/bench"),
         ]
-        self._test_list("s", SHELVES)
-        self._test_path("s", SHELVES)
-
-    def test_benches(self):
-        BENCHES = [
-            "A/A1/a1_1",
-            "A/A1/a1_2",
-            "A/A2/a2_1",
-            "A/A2/a2_2",
-        ]
-        self._test_list("b", BENCHES)
-        self._test_path("b", BENCHES)
+        for (wb_cmd, name) in bad_inputs:
+            o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {wb_cmd} {name}",
+                    replace=dict(wb_cmd=wb_cmd, name=name))
+            self.assertEqual(o.returncode, 1)
 
 
 # -----------------------------------------------------------------------------
