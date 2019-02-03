@@ -145,7 +145,7 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
 
     # SHOW PATH TO SHELF AND BENCH FILES
 
-    def _test_print_path_to_file(self, wb_cmd, name):
+    def _test_print_path_to_file(self, wb_cmd, name, missing=False):
         """
         wb s shelfName
         wb b benchName
@@ -156,17 +156,27 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
 
         o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {wb_cmd} {name}",
                 replace=dict(wb_cmd=wb_cmd, name=name))
-        self.assertEqual(filename, o.stdout.strip())
-        self.assertEqual(o.returncode, 0)
+        if missing is False:
+            self.assertEqual(o.stdout.strip(), filename)
+            self.assertEqual(o.stderr.strip(), "")
+            self.assertEqual(o.returncode, 0)
+        else:
+            self.assertEqual(o.stdout.strip(), "")
+            self.assertEqual(o.stderr.strip(), filename)
+            self.assertEqual(o.returncode, ERR_MISSING)
 
     def test_show_simple_bench_file(self):
         self._test_print_path_to_file("b", "outer/inner/simple1")
         self._test_print_path_to_file("b", "outer/inner/simple2")
+        self._test_print_path_to_file("b", "valid/but/missing/bench",
+                                      missing=True)
 
     def test_show_simple_shelf_path(self):
         self._test_print_path_to_file("s", "/")
         self._test_print_path_to_file("s", "outer/")
         self._test_print_path_to_file("s", "outer/inner/")
+        self._test_print_path_to_file("s", "valid/but/missing/shelf/",
+                                      missing=True)
 
     # RUN COMMAND ON A SHELF AND BENCH FILE
 
@@ -196,9 +206,6 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
         bad_inputs = [
             ("s", "invalid-shelf-missing-tailing-slash", ERR_INVALID),
             ("b", "invalid-bench-having-tailing-slash/", ERR_INVALID),
-
-            ("s", "valid/but/non/existent/shelf/", ERR_MISSING),
-            ("b", "valid/but/non/existent/bench", ERR_MISSING),
         ]
         for (wb_cmd, name, errCode) in bad_inputs:
             o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {wb_cmd} {name}",
