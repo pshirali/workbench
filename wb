@@ -1,6 +1,5 @@
 #!/usr/bin/env bash -i
 
-
 # -----------------------------------------------------------------------------
 #
 # Copyright 2019 Praveen G Shirali <praveengshirali@gmail.com>
@@ -21,15 +20,19 @@
 
 
 log () { echo -e "$@"; }
+errlog () { >&2 log "$@"; }
 err () { >&2 log "ERROR:" "$@"; }
-
 
 readonly _WORKBENCH_VERSION=0.0.1
 readonly _PROG="${0##*/}"
 
-
+WORKBENCH_BENCH_EXTN="${WORKBENCH_BENCH_EXTN:-bench}"
+WORKBENCH_SHELF_FILE="${WORKBENCH_SHELF_FILE:-wb.shelf}"
 WORKBENCH_GREPPER="${WORKBENCH_GREPPER:-egrep}"
 
+ERR_MISSING=3
+ERR_INVALID=4
+ERR_DECLINED=5
 
 _wb_consume_rcfile () {
     local wbrc="${HOME}/.workbenchrc"
@@ -42,7 +45,7 @@ _wb_consume_rcfile () {
             source "${WORKBENCH_RC}"
         else
             err "Can't find WORKBENCH_RC: '${WORKBENCH_RC}'"
-            exit 1
+            exit $ERR_MISSING
         fi
     fi
 }
@@ -52,14 +55,130 @@ _wb_init_workbench_home () {
     mkdir -p "${WORKBENCH_HOME}"
     if [[ ! -d "${WORKBENCH_HOME}" ]]; then
         err "WORKBENCH_HOME (${WORKBENCH_HOME}) does not exist. Quitting!"
-        exit 1
+        exit $ERR_MISSING
     fi
 }
 
+_wb_confirm () {
+    if [[ -z "${WORKBENCH_AUTOCONFIRM}" ]]; then
+        read -e -r -p "$@ [y/N] " ans
+        if [[ "$ans" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+            return 0
+        else
+            return $ERR_DECLINED
+        fi
+    else
+        return 0
+    fi
+}
+
+_wb_list () {
+    # $1 = shelf|bench
+    local findByName
+    local substitute
+    case "$1" in
+        shelf)
+            findByName="${WORKBENCH_SHELF_FILE}"
+            substitute="${WORKBENCH_SHELF_FILE}"
+            ;;
+        bench)
+            findByName="*.${WORKBENCH_BENCH_EXTN}"
+            substitute=".${WORKBENCH_BENCH_EXTN}"
+            ;;
+    esac
+
+    find "${WORKBENCH_HOME}" -type f -name "${findByName}" | while read i; do
+
+        local relPath="$(echo ${i#${WORKBENCH_HOME}} | sed 's|^/*||g')"
+        local relName="$(echo ${relPath/%${substitute}/})"
+        [[ -z "${relName}" ]] && local relName="/"
+        log "${relName}"
+
+    done | sort
+}
+
+_wb_file_for_shelf () {
+    local len=${#1}
+    local stripName
+    ((len--))
+    if [[ "${1:$len:1}" != "/" ]]; then
+        err "Shelf name must end with a '/'. Got '$1'"
+        return $ERR_INVALID
+    fi
+    stripName="$(echo $1 | sed 's|^/*||g' | sed 's|/*$||g')"
+    [[ ! -z "${stripName}" ]] && stripName="${stripName}/"
+    echo "${WORKBENCH_HOME}/${stripName}${WORKBENCH_SHELF_FILE}"
+}
+
+_wb_file_for_bench () {
+    local len=${#1}
+    ((len--))
+    if [[ "${1:$len:1}" == "/" ]]; then
+        err "Bench name must NOT end with a '/'. Got '$1'"
+        return $ERR_INVALID
+    fi
+    local stripName="$(echo $1 | sed 's|^/*||g')"
+    echo "${WORKBENCH_HOME}/${stripName}.${WORKBENCH_BENCH_EXTN}"
+}
 
 _wb_do_vars () { set | ${WORKBENCH_GREPPER} "^WORKBENCH_\w+=" | sort; }
 
+_wb_help_operate () {
+    log "TODO: Help - operations"
+}
+_wb_do_operate () {
+    local resource="$1"; shift                # shelf|bench
+    [[ "$1" = "-h" ]] || [[ "$1"  = "--help" ]] && _wb_help_operate && exit 0
+    local allowNew
+    local yes
+    while [[ ! -z "$1" ]]
+        do case "$1" in
+            -n|--new) allowNew="1"; shift;;
+            -y|--yes) yes="1"; shift;;
+            *) break;;
+        esac
+    done
+    if [[ -z "$@" ]]; then
+        _wb_list "${resource}"
+    else
+        local resourceName="$1"; shift
+        local resourceFile
+        local exitCode
+        resourceFile="$(_wb_file_for_${resource} ${resourceName})"
+        exitCode="$?"
+        [[ "${exitCode}" != "0" ]] && exit "${exitCode}"
+        if [[ -z "$@" ]]; then
+            if [[ -f "${resourceFile}" ]]; then
+                log "${resourceFile}"
+                exit 0
+            else
+                errlog "${resourceFile}"
+                exit $ERR_MISSING
+            fi
+        else
+            if [[ ! -z "${allowNew}" ]]; then
+                mkdir -p "$(dirname ${resourceFile})"
+                touch "${resourceFile}"
+            fi
+            if [[ -f "${resourceFile}" ]]; then
+                [[ ! -z "${yes}" ]] && WORKBENCH_AUTOCONFIRM=1
+                if [[ "$1" == "rm" ]]; then
+                    _wb_confirm "Execute '$@' on '${resourceFile}' ?"
+                    exitCode="$?"
+                    [[ "${exitCode}" != "0" ]] && exit "${exitCode}"
+                fi
+                "$@" "${resourceFile}"
+            else
+                err "${resource} '${resourceName}' does not exist!"
+                exit $ERR_MISSING
+            fi
+        fi
+    fi
+}
 
+_wb_show_help () {
+    log "TODO: Main help"
+}
 main () {
     _wb_consume_rcfile
     WORKBENCH_HOME="$(echo ${WORKBENCH_HOME} | sed 's|/*$||g')"
@@ -72,6 +191,9 @@ main () {
     case "$1" in
         -V) log "${_WORKBENCH_VERSION}";;
         -E) _wb_do_vars;;
+
+        s) shift; _wb_do_operate "shelf" "$@";;
+        b) shift; _wb_do_operate "bench" "$@";;
     esac
 }
 
