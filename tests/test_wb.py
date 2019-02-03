@@ -2,8 +2,10 @@
 
 import subprocess
 import unittest
+import shutil
 
-from os.path import abspath, dirname, join, basename
+from os import makedirs
+from os.path import abspath, dirname, join, basename, exists, isdir
 
 WB_DIR=abspath(join(dirname(__file__), ".."))
 TESTDATA=join(WB_DIR, "tests", "testdata")
@@ -24,8 +26,10 @@ def run(cmd, **kwargs):
     )
     run_args.update(kwargs)
     cp = subprocess.run(cmd, **run_args)
-    cp.stdout = cp.stdout.decode('utf-8')
-    cp.stderr = cp.stderr.decode('utf-8')
+    if not isinstance(cp.stdout, str):
+        cp.stdout = cp.stdout.decode('utf-8')
+    if not isinstance(cp.stderr, str):
+        cp.stderr = cp.stderr.decode('utf-8')
     return cp
 
 
@@ -108,8 +112,8 @@ class TestWb(unittest.TestCase):
 
     def test_list_simple_shelves(self):
         o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} s")
-        benches = set(o.stdout.strip().split('\n'))
-        self.assertEqual(benches, set([
+        shelves = set(o.stdout.strip().split('\n'))
+        self.assertEqual(shelves, set([
             "/",
             "outer/",
             "outer/inner/"
@@ -179,6 +183,62 @@ class TestWb(unittest.TestCase):
             o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {wb_cmd} {name}",
                     replace=dict(wb_cmd=wb_cmd, name=name))
             self.assertEqual(o.returncode, 1)
+
+    def _test_rm_confirmation(self, wb_cmd, name, autoconfirm=False):
+        rm_test_dir = join(TESTDATA, "wbhome/rm_test")
+        try:
+            # cleanup before the test
+            if exists(rm_test_dir) and isdir(rm_test_dir):
+                shutil.rmtree(rm_test_dir)
+
+            # create a resource file with some dummy data
+            get_filename = {
+                "s": get_shelf_filename,
+                "b": get_bench_filename
+            }
+            filename = get_filename[wb_cmd](rm_test_dir, name)
+            makedirs(dirname(filename), exist_ok=True)
+            with open(filename, "w") as f:
+                f.write("some-dummy-data")
+
+            if autoconfirm is False:
+                # kwargs for the command, with STDIN for confirmation prompt
+                kwargs = dict(
+                    replace=dict(wb_cmd=wb_cmd, name=name),
+                    encoding="utf-8",
+                    input="n\n"                                 # NO
+                )
+                o = run("WORKBENCH_HOME={td}/wbhome/rm_test "
+                        "WORKBENCH_AUTOCONFIRM= "
+                        "{wb} {wb_cmd} {name} rm", **kwargs)
+                self.assertEqual(o.returncode, 1)               # ExitCode=1
+                self.assertTrue(exists(filename))               # file remains
+
+                kwargs["input"] = "y\n"                         # YES
+                o = run("WORKBENCH_HOME={td}/wbhome/rm_test "
+                        "{wb} {wb_cmd} {name} rm", **kwargs)
+
+            else:
+                o = run("WORKBENCH_HOME={td}/wbhome/rm_test "
+                        "WORKBENCH_AUTOCONFIRM=1 "
+                        "{wb} {wb_cmd} {name} rm",
+                        replace=dict(wb_cmd=wb_cmd, name=name))
+
+            self.assertEqual(o.returncode, 0)               # ExitCode=0
+            self.assertTrue(not exists(filename))           # file deleted
+
+        finally:
+            shutil.rmtree(rm_test_dir, ignore_errors=True)
+
+    def test_confirmation_prompt_on_rm(self):
+        inputs = [
+            (("s", "remove_me/"), {}),
+            (("b", "remove_me/my_bench"), {}),
+            (("s", "remove_me/"), {"autoconfirm": True}),
+            (("b", "remove_me/my_bench"), {"autoconfirm": True}),
+        ]
+        for (args, kwargs) in inputs:
+            self._test_rm_confirmation(*args, **kwargs)
 
 
 # -----------------------------------------------------------------------------
