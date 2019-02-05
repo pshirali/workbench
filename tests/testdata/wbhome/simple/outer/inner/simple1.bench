@@ -1,1 +1,8 @@
 echo "SIMPLE1"
+workbench_activate () {
+    echo "Default-Activated" $@
+    exit
+}
+workbench_deactivate () {
+    echo "Default-Deactivated"
+}

@@ -1,1 +1,4 @@
 echo "INNER"
+workbench_new () {
+    echo "Default-New" $@
+}
