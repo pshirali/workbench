@@ -30,6 +30,14 @@ WORKBENCH_BENCH_EXTN="${WORKBENCH_BENCH_EXTN:-bench}"
 WORKBENCH_SHELF_FILE="${WORKBENCH_SHELF_FILE:-wb.shelf}"
 WORKBENCH_GREPPER="${WORKBENCH_GREPPER:-egrep}"
 
+WORKBENCH_ACTIVATE_CMD="${WORKBENCH_ACTIVATE_CMD:-/bin/bash --rcfile}"
+WORKBENCH_COMMAND_CMD="${WORKBENCH_COMMAND_CMD:-/bin/bash -ic}"
+
+WORKBENCH_ACTIVATE_FUNC="${WORKBENCH_ACTIVATE_FUNC:-workbench_activate}"
+WORKBENCH_DEACTIVATE_FUNC="${WORKBENCH_DEACTIVATE_FUNC:-workbench_deactivate}"
+WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC:-workbench_command}"
+WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC:-workbench_new}"
+
 ERR_MISSING=3
 ERR_INVALID=4
 ERR_DECLINED=5
@@ -176,6 +184,10 @@ _wb_do_operate () {
     fi
 }
 
+_wb_do_execute () {
+    echo "$@"
+}
+
 _wb_show_help () {
     log "TODO: Main help"
 }
@@ -194,6 +206,10 @@ main () {
 
         s) shift; _wb_do_operate "shelf" "$@";;
         b) shift; _wb_do_operate "bench" "$@";;
+
+        w) shift; _wb_do_execute "w" "$@";;
+        r) shift; _wb_do_execute "r" "$@";;
+        n) shift; _wb_do_execute "n" "$@";;
     esac
 }
 
