@@ -11,9 +11,11 @@ WB_DIR=abspath(join(dirname(__file__), ".."))
 TESTDATA=join(WB_DIR, "tests", "testdata")
 WB=join(WB_DIR, "wb")
 
+ERR_FATAL=1
 ERR_MISSING=3
 ERR_INVALID=4
 ERR_DECLINED=5
+ERR_EXISTS=6
 
 
 def run(cmd, **kwargs):
