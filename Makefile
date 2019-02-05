@@ -6,7 +6,7 @@ test:		## Invoke tests
 	@bash --version
 	@echo
 	@echo "===[ tests ]==="
-	@tests/test_wb.py
+	@tests/test_wb.py -v
 
 .PHONY: help
 help:

@@ -423,16 +423,16 @@ class TestWbExecute(unittest.TestCase):
         stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
         self.assertEqual(stdout, ["ROOT", "OUTER", "INNER", "SIMPLE1"])
 
-    # def test_invoke_activate_on_bench(self):
-    #     """
-    #     wb w <benchName>
-    #     Activate -> exit
+    def test_invoke_activate_on_bench(self):
+        """
+        wb w <benchName>
+        Activate -> exit
 
-    #     NOTE: This test can hang if exit fails. TODO: Implement a failsafe
-    #     """
-    #     o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
-    #             "{wb} w outer/inner/simple1",
-    #             input="exit\n", encoding="ascii")
+        NOTE: This test can hang if exit fails. TODO: Implement a failsafe
+        """
+        o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
+                "{wb} w outer/inner/simple1",
+                input="exit\n", encoding="ascii")
 
     def test_workbench_command_override_and_deactivate_on_exit(self):
         """
