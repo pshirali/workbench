@@ -337,6 +337,34 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
                                             new_flag=new_flag)
 
 
+class TestWbExecute(unittest.TestCase):
+
+    def test_wb_execute_commands_without_args_list_workbenches(self):
+        """
+        wb w|r|n
+        Lists benches
+        """
+        for c in ["w", "r", "n"]:
+            o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {c}",
+                    replace=dict(c=c))
+            benches = set(o.stdout.strip().split('\n'))
+            self.assertEqual(benches, set([
+                "outer/inner/simple1",
+                "outer/inner/simple2"
+            ]))
+            self.assertEqual(o.returncode, 0)
+
+    def test_cant_create_new_bench_when_one_already_exists(self):
+        """
+        wb n <benchName> when <benchName> already exists raises error
+        """
+        o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} n outer/inner/simple1")
+        self.assertEqual(o.returncode, ERR_EXISTS)
+
+    # TODO:
+    # Run command
+    # Workon command
+
 # -----------------------------------------------------------------------------
 #
 
