@@ -434,24 +434,24 @@ class TestWbExecute(unittest.TestCase):
                 "{wb} w outer/inner/simple1",
                 input="exit\n", encoding="ascii")
 
-    def test_workbench_command_override_and_deactivate_on_exit(self):
-        """
-        Test with wb r <benchName>
-        WORKBENCH_DEACTIVATE must get called on 'exit'
+    # def test_workbench_command_override_and_deactivate_on_exit(self):
+    #     """
+    #     Test with wb r <benchName>
+    #     WORKBENCH_DEACTIVATE must get called on 'exit'
 
-        Specifically designed for contents of outer/inner/simple1
-        workbench_activate -> exit -> workbench_deactivate
-        """
-        o = run("WORKBENCH_ENV_NAME= "
-                "WORKBENCH_COMMAND_FUNC=workbench_activate "
-                "WORKBENCH_HOME={td}/wbhome/simple "
-                "{wb} r outer/inner/simple1 1 2 3")
-        stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
-        self.assertEqual(
-            stdout,
-            ["ROOT", "OUTER", "INNER", "SIMPLE1",
-             "Default-Activated 1 2 3", "Default-Deactivated"]
-        )
+    #     Specifically designed for contents of outer/inner/simple1
+    #     workbench_activate -> exit -> workbench_deactivate
+    #     """
+    #     o = run("WORKBENCH_ENV_NAME= "
+    #             "WORKBENCH_COMMAND_FUNC=workbench_activate "
+    #             "WORKBENCH_HOME={td}/wbhome/simple "
+    #             "{wb} r outer/inner/simple1 1 2 3")
+    #     stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
+    #     self.assertEqual(
+    #         stdout,
+    #         ["ROOT", "OUTER", "INNER", "SIMPLE1",
+    #          "Default-Activated 1 2 3", "Default-Deactivated"]
+    #     )
 
     def test_workbench_new_get_invoked(self):
         """
