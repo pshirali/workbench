@@ -38,9 +38,11 @@ WORKBENCH_DEACTIVATE_FUNC="${WORKBENCH_DEACTIVATE_FUNC:-workbench_deactivate}"
 WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC:-workbench_command}"
 WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC:-workbench_new}"
 
+ERR_FATAL=1
 ERR_MISSING=3
 ERR_INVALID=4
 ERR_DECLINED=5
+ERR_EXISTS=6
 
 _wb_consume_rcfile () {
     local wbrc="${HOME}/.workbenchrc"
@@ -184,8 +186,73 @@ _wb_do_operate () {
     fi
 }
 
+_wb_compose_code () {
+    echo "echo $@"
+}
+_wb_help_execute () {
+    log "TODO: Help - execute"
+}
 _wb_do_execute () {
-    echo "$@"
+    local cmd="$1"; shift                # command: w|r|n
+    [[ "$1" = "-h" ]] || [[ "$1"  = "--help" ]] && _wb_help_execute && exit 0
+    local dumpCode
+    case "$1" in
+        -d|--dump) dumpCode="1"; shift;;
+    esac
+    if [[ -z "$@" ]]; then
+        _wb_list "bench"
+    else
+        local resourceName="$1"; shift
+        local resourceFile
+        local exitCode
+        resourceFile="$(_wb_file_for_bench ${resourceName})"
+        exitCode="$?"
+        [[ "${exitCode}" != "0" ]] && exit "${exitCode}"
+
+        if [[ "${dumpCode}" != "1" ]]; then
+            if [[ "${cmd}" == "n" ]]; then
+                if [[ -f "${resourceFile}" ]]; then
+                    err "Bench '${resourceName}' exists: '${resourceFile}'"
+                    err "Cannot create a new workbench."
+                    exit $ERR_EXISTS
+                fi
+                mkdir -p "$(dirname ${resourceFile})"
+                touch "${resourceFile}"
+            fi
+            if [[ ! -f "${resourceFile}" ]]; then
+                err "Bench '${resourceName}' does not exist. Quitting!"
+                exit $ERR_MISSING
+            fi
+        fi
+
+        local executor
+        case "${cmd}" in
+            w) executor="${WORKBENCH_ACTIVATE_CMD}";;
+            r) executor="${WORKBENCH_COMMAND_CMD}";;
+            n) executor="${WORKBENCH_COMMAND_CMD}";;
+        esac
+
+        resourceName="$(echo ${resourceName} | sed 's|^/*||g')"
+        if [[ ${dumpCode} == "1" ]]; then
+            _wb_compose_code "${resourceName}" "${resourceFile}" \
+                             "${cmd}" "$@"
+        else
+            local tmpFile
+            tmpFile=`mktemp`
+            if [[ "$?" != "0" ]]; then
+                err "Failed to create temp file using 'mktemp'. Quitting!"
+                exit $ERR_FATAL
+            fi
+            chmod +x "${tmpFile}"
+            if [[ "$?" != "0" ]]; then
+                err "Failed to set exec permission on workbench. Quitting!"
+                exit $ERR_FATAL
+            fi
+            _wb_compose_code "${resourceName}" "${resourceFile}" \
+                             "${cmd}" "$@" > "${tmpFile}"
+            ${executor} "${tmpFile}"
+        fi
+    fi
 }
 
 _wb_show_help () {
