@@ -453,31 +453,31 @@ class TestWbExecute(unittest.TestCase):
     #          "Default-Activated 1 2 3", "Default-Deactivated"]
     #     )
 
-    def test_workbench_new_get_invoked(self):
-        """
-        wb n <newBench>
-        Creates a new bench and calls 'workbench_new' as the entrypoint
+    # def test_workbench_new_get_invoked(self):
+    #     """
+    #     wb n <newBench>
+    #     Creates a new bench and calls 'workbench_new' as the entrypoint
 
-        'workbench_new' is written to 'wbhome/rm_test_new/wb.bench'
-        The bench that is executed is 'wbhome/rm_test_new/nested/new_one.bench'
-        The 'workbench_new' from the last sourced file (rm_test_new) will
-        take effect.
-        """
-        rm_test_dir = join(TESTDATA, "wbhome/rm_test_new")
-        try:
-            if exists(rm_test_dir) and isdir(rm_test_dir):
-                shutil.rmtree(rm_test_dir)
-            shelf_file = get_shelf_filename(rm_test_dir, "")
-            makedirs(rm_test_dir, exist_ok=True)
-            with open(shelf_file, "w") as f:
-                f.write("workbench_new () { echo \"Default-New\" $@; }\n")
+    #     'workbench_new' is written to 'wbhome/rm_test_new/wb.bench'
+    #     The bench that is executed is 'wbhome/rm_test_new/nested/new_one.bench'
+    #     The 'workbench_new' from the last sourced file (rm_test_new) will
+    #     take effect.
+    #     """
+    #     rm_test_dir = join(TESTDATA, "wbhome/rm_test_new")
+    #     try:
+    #         if exists(rm_test_dir) and isdir(rm_test_dir):
+    #             shutil.rmtree(rm_test_dir)
+    #         shelf_file = get_shelf_filename(rm_test_dir, "")
+    #         makedirs(rm_test_dir, exist_ok=True)
+    #         with open(shelf_file, "w") as f:
+    #             f.write("workbench_new () { echo \"Default-New\" $@; }\n")
 
-            o = run("WORKBENCH_ENV_NAME= "
-                    "WORKBENCH_HOME={td}/wbhome/rm_test_new "
-                    "{wb} n nested/new_one 1 2 3")
-            self.assertEqual(o.stdout.strip(), "Default-New 1 2 3")
-        finally:
-            shutil.rmtree(rm_test_dir)
+    #         o = run("WORKBENCH_ENV_NAME= "
+    #                 "WORKBENCH_HOME={td}/wbhome/rm_test_new "
+    #                 "{wb} n nested/new_one 1 2 3")
+    #         self.assertEqual(o.stdout.strip(), "Default-New 1 2 3")
+    #     finally:
+    #         shutil.rmtree(rm_test_dir)
 
 
 
