@@ -17,12 +17,15 @@ ERR_INVALID=4
 ERR_DECLINED=5
 ERR_EXISTS=6
 
+EXECUTOR="bash"
+EXECUTOR_VERSION_FLAG=" --version"
+
 
 def run(cmd, **kwargs):
     if not isinstance(cmd, str):
         raise ValueError("Expected command to be a string")
     replace = kwargs.pop("replace", {})
-    wb_data = dict(td=TESTDATA, wb="bash {}".format(WB))
+    wb_data = dict(td=TESTDATA, wb="{} {}".format(EXECUTOR, WB))
     wb_data.update(replace)
     cmd = cmd.format(**wb_data)
     run_args = dict(
@@ -57,6 +60,14 @@ GET_FILENAME = {
     "b": get_bench_filename,
 }
 
+
+def show_meta():
+    print("----- [ meta ] -----")
+    print(run("{}{}".format(EXECUTOR, EXECUTOR_VERSION_FLAG)).stdout)
+    print("-----")
+
+
+show_meta()
 
 
 # -----------------------------------------------------------------------------

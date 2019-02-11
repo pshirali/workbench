@@ -2,10 +2,6 @@
 
 .PHONY: test
 test:		## Invoke tests
-	@echo "===[ bash --version ]==="
-	@bash --version
-	@echo
-	@echo "===[ tests ]==="
 	@tests/test_wb.py -v
 
 .PHONY: help
