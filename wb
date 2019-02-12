@@ -134,11 +134,65 @@ _wb_file_for_bench () {
 _wb_do_vars () { set | ${WORKBENCH_GREPPER} "^WORKBENCH_\w+=" | sort; }
 
 _wb_help_operate () {
-    log "TODO: Help - operations"
+    local cmd="$1"
+    local single="$2"
+    local plural="$3"
+    cat <<EOF
+
+ ══ USAGE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     ${_PROG} ${cmd} [options] <${single}Name> [[arg]..]
+
+
+ ══ OPTIONS ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     -n, --new     Don't error on names which don't exist.
+                   Use this switch to create new files.
+     -y, --yes     Don't prompt for confirmation on 'rm'
+                   Sets WORKBENCH_AUTOCONFIRM to true.
+
+
+ ══ DESCRIPTION ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     ${_PROG} ${cmd}
+        Lists ${plural}
+
+     ${_PROG} ${cmd} <${single}Name>
+        Prints the absolute path to the underlying resource file
+        for the <${single}Name>. A non-zero exitCode is returned
+        if the <${single}Name> does not exist.
+
+     ${_PROG} ${cmd} [options] <${single}Name> [[arg]..]
+        Execute a command (with optional args) on the underlying
+        resource file for the <${single}Name>.
+
+        Example:
+            ${_PROG} ${cmd} [options] <${single}Name> ls -l
+            ${_PROG} ${cmd} [options] <${single}Name> less
+            ${_PROG} ${cmd} [options] <${single}Name> vim
+            etc.
+
+        A missing <${single}Name> results in an error.
+        You can pass '-n' or '--new' to create create the underlying
+        folder structure and resource file.
+
+        If the first command in [[arg]..] is 'rm', then an interactive
+        confirmation prompt is presented. This can be skipped by
+        passing '-y' or '--yes'.
+
+        It can also be skipped automatically by setting:
+        WORKBENCH_AUTOCONFIRM to any non-empty value.
+
+EOF
 }
 _wb_do_operate () {
     local resource="$1"; shift                # shelf|bench
-    [[ "$1" = "-h" ]] || [[ "$1"  = "--help" ]] && _wb_help_operate && exit 0
+    if [[ "$1" = "-h" ]] || [[ "$1"  = "--help" ]]; then
+        case "$resource" in
+            shelf) _wb_help_operate "s" "shelf" "shelves" && exit 0;;
+            bench) _wb_help_operate "b" "bench" "benches" && exit 0;;
+        esac
+    fi
     local allowNew
     local yes
     while [[ ! -z "$1" ]]
@@ -416,6 +470,8 @@ main () {
         a) shift; _wb_do_execute "a" "$@";;
         c) shift; _wb_do_execute "c" "$@";;
         n) shift; _wb_do_execute "n" "$@";;
+
+        *) err "Unknown command '$1'. Run '${_PROG} -h' for help." && exit 1;;
     esac
 }
 
