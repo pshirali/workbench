@@ -248,7 +248,35 @@ _wb_compose_code () {
     printf '\n'
 }
 _wb_help_execute () {
-    log "TODO: Help - execute"
+    cat <<EOF
+
+ ══ USAGE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     ${_PROG} <a|c|n> [--dump] <benchName> [[arg]..]
+
+          a        Activate a workbench in a new interactive subshell
+                   Entrypoint:
+                    └─ WORKBENCH_ACTIVATE_FUNC=${WORKBENCH_ACTIVATE_FUNC}
+
+          c        Run a command from a workbench in the current shell
+                   Entrypoint:
+                    └─ WORKBENCH_COMMAND_FUNC=${WORKBENCH_COMMAND_FUNC}
+
+          n        Create a new workbench by executing shell code from:
+                   Entrypoint:
+                    └─ WORKBENCH_NEW_FUNC=${WORKBENCH_NEW_FUNC}
+
+          Arguments [[arg]..] are passed as-is to the entrypoint function.
+
+
+ ══ OPTIONS ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     -d, --dump    Dump the auto-generated init script on stdout.
+                   This switch does not validate the presence
+                   of <benchName> on the disk. Use this switch to
+                   review the workbench code.
+
+EOF
 }
 _wb_do_execute () {
     local cmd="$1"; shift                # command: a|c|n
