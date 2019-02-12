@@ -430,9 +430,9 @@ _wb_show_help () {
 
  ══ DESCRIPTION ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
 
-     WorkBench is a environment manager for the shell. You can use
-     it to build project-specific virtualenvs, each having its own
-     set of env variables, aliases and functions.
+     WorkBench is a hierarchical environment manager for the shell.
+     You can use it to build project-specific virtualenvs, each having
+     its own set of env variables, aliases and functions.
 
      WorkBench builds an environment by overlaying shell code from
      multiple files (called 'shelves'), the last of which represents
