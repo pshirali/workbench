@@ -33,10 +33,10 @@ WORKBENCH_GREPPER="${WORKBENCH_GREPPER:-egrep}"
 WORKBENCH_ACTIVATE_CMD="${WORKBENCH_ACTIVATE_CMD:-/bin/bash --rcfile}"
 WORKBENCH_COMMAND_CMD="${WORKBENCH_COMMAND_CMD:-/bin/bash -ic}"
 
-WORKBENCH_ACTIVATE_FUNC="${WORKBENCH_ACTIVATE_FUNC:-workbench_activate}"
-WORKBENCH_DEACTIVATE_FUNC="${WORKBENCH_DEACTIVATE_FUNC:-workbench_deactivate}"
-WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC:-workbench_command}"
-WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC:-workbench_new}"
+WORKBENCH_ACTIVATE_FUNC="${WORKBENCH_ACTIVATE_FUNC:-workbench_OnActivate}"
+WORKBENCH_DEACTIVATE_FUNC="${WORKBENCH_DEACTIVATE_FUNC:-workbench_OnDeactivate}"
+WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC:-workbench_OnCommand}"
+WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC:-workbench_OnNew}"
 
 ERR_FATAL=1
 ERR_MISSING=3
@@ -197,10 +197,10 @@ if [[ ! -z "\${WORKBENCH_ENV_NAME}" ]]; then
     echo "You are already inside '\${WORKBENCH_ENV_NAME}'"
     builtin exit 1
 fi
-workbench_new () { echo \$@; }
-workbench_activate () { :; }
-workbench_deactivate () { :; }
-workbench_command () { "\$@"; }
+workbench_OnNew () { echo \$@; }
+workbench_OnActivate () { :; }
+workbench_OnDeactivate () { :; }
+workbench_OnCommand () { "\$@"; }
 exit () { "\${WORKBENCH_DEACTIVATE_FUNC}"; builtin exit \$? 2> /dev/null; }
 export WORKBENCH_ENV_NAME="${resourceName}"
 export ORIG_PS1="\${PS1}"
@@ -238,8 +238,8 @@ _wb_compose_code () {
 
     # entrypoint
     case "${cmd}" in
-        w) printf '"${WORKBENCH_ACTIVATE_FUNC}"';;
-        r) printf '"${WORKBENCH_COMMAND_FUNC}"';;
+        a) printf '"${WORKBENCH_ACTIVATE_FUNC}"';;
+        c) printf '"${WORKBENCH_COMMAND_FUNC}"';;
         n) printf '"${WORKBENCH_NEW_FUNC}"';;
     esac
     if [[ ! -z "${@:4}" ]]; then
@@ -251,7 +251,7 @@ _wb_help_execute () {
     log "TODO: Help - execute"
 }
 _wb_do_execute () {
-    local cmd="$1"; shift                # command: w|r|n
+    local cmd="$1"; shift                # command: a|c|n
     [[ "$1" = "-h" ]] || [[ "$1"  = "--help" ]] && _wb_help_execute && exit 0
     local dumpCode
     case "$1" in
@@ -285,8 +285,8 @@ _wb_do_execute () {
 
         local executor
         case "${cmd}" in
-            w) executor="${WORKBENCH_ACTIVATE_CMD}";;
-            r) executor="${WORKBENCH_COMMAND_CMD}";;
+            a) executor="${WORKBENCH_ACTIVATE_CMD}";;
+            c) executor="${WORKBENCH_COMMAND_CMD}";;
             n) executor="${WORKBENCH_COMMAND_CMD}";;
         esac
 
@@ -332,8 +332,8 @@ main () {
         s) shift; _wb_do_operate "shelf" "$@";;
         b) shift; _wb_do_operate "bench" "$@";;
 
-        w) shift; _wb_do_execute "w" "$@";;
-        r) shift; _wb_do_execute "r" "$@";;
+        a) shift; _wb_do_execute "a" "$@";;
+        c) shift; _wb_do_execute "c" "$@";;
         n) shift; _wb_do_execute "n" "$@";;
     esac
 }
