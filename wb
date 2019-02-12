@@ -314,7 +314,60 @@ _wb_do_execute () {
 }
 
 _wb_show_help () {
-    log "TODO: Main help"
+    cat <<EOF
+
+    ╔═╗       ┌─────╔═╗
+    ╙ W 0 R K B E N C H                         Version ${_WORKBENCH_VERSION}
+
+
+ ══ USAGE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     [[ENV=<value>]...] ${_PROG} <command> [args]
+
+
+ ══ ENV CONFIGURATION ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     WORKBENCH_RC=<rcfile>
+        Source a supplied rcfile before execution. If unspecified,
+        then the default location '\$HOME/.workbenchrc' is tried.
+
+
+ ══ COMMANDS (Use '-h' for additional help/options [+]) ─ ─ ─ ─ ─ ─ ─ ─
+
+
+    -V     Show version and quit
+    -E     Show WORKBENCH environment variables and quit
+
+     s     List shelves. Operate on a shelf file.               [+]
+     b     List workbenches. Operate on a bench file.           [+]
+
+     a     List workbenches. Activate a workbench.              [+]
+     c     List workbenches. Run a command from a workbench.    [+]
+     n     List workbenches. Create a new workbench             [+]
+
+
+ ══ DESCRIPTION ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     WorkBench is a environment manager for the shell. You can use
+     it to build project-specific virtualenvs, each having its own
+     set of env variables, aliases and functions.
+
+     WorkBench builds an environment by overlaying shell code from
+     multiple files (called 'shelves'), the last of which represents
+     the workspace (called 'bench')
+
+     Read the 'README.md' for a detailed explanation.
+
+
+ ══ LICENSE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+
+     Apache 2.0 -- https://www.apache.org/licenses/LICENSE-2.0
+
+     Copyright 2018-19 Praveen G Shirali <praveengshirali@gmail.com>
+     https://github.com/pshirali/workbench
+
+
+EOF
 }
 main () {
     _wb_consume_rcfile
