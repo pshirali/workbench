@@ -424,6 +424,7 @@ class TestWbExecute(unittest.TestCase):
                     break
             if not found:
                 self.fail("Did not find '{}' in dump".format(m))
+        self.assertEqual(o.returncode, 0)
 
     def test_invoke_command_on_bench(self):
         """
@@ -435,6 +436,7 @@ class TestWbExecute(unittest.TestCase):
         self.assertEqual(stdout,
             ["ROOT", "OUTER", "INNER", "SIMPLE1", "Default-Command"]
         )
+        self.assertEqual(o.returncode, 0)
 
     def test_invoke_activate_on_bench(self):
         """
@@ -446,6 +448,7 @@ class TestWbExecute(unittest.TestCase):
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} a outer/inner/simple1",
                 input="exit\n", encoding="ascii")
+        self.assertEqual(o.returncode, 0)
 
     # -------- TODO ---------
     # The tests below work fine on Bash5 (tested on OSX)
