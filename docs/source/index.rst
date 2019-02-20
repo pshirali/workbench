@@ -27,19 +27,28 @@ vanilla \*nix systems.
 
 .. toctree::
    :maxdepth: 2
-   :caption: First steps:
+   :caption: Getting Started:
 
    first_steps/installation
    first_steps/configuration
-
+   first_steps/completion
 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Concepts:
+   :caption: Using WorkBench:
 
-   concepts/subshell
-   concepts/basics
+   using_wb/subshell
+   using_wb/concepts
+   using_wb/usage
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference:
+
+   reference/environ
+   reference/exitcodes
 
 
 
