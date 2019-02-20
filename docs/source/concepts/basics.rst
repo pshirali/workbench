@@ -70,7 +70,7 @@ The table below maps the name of the `shelf` to the underlying resource file:
     | bar/baz/      | WORKBENCH_HOME/bar/baz/wb.shelf               |
     +---------------+-----------------------------------------------+
 
-The sub-directory ``bar/`` is not a `shelf` because it doesn't
+The subdirectory ``bar/`` is not a `shelf` because it doesn't
 contain ``wb.shelf``.
 
 
@@ -144,9 +144,9 @@ Benefits
 
 
 1. Overall there is less code to maintain.
-2. It is easy influence control on a whole class of environments by moving
+2. It is easy influence control on a whole group of environments by moving
    code to a ``Shelf`` at the appropriate subdirectory
-3. Redeclaration results in overriding. Code in `shelf` at a deeper depths 
+3. Redeclaration results in overriding. Code in a `shelf` at a deeper depth  
    overrides those at lower depths (closer to ``WORKBENCH_HOME``). Code in
    a `bench` overrides all `shelves`. The workbench `tree` could be designed
    to be shallow, or deeply nested to cater to the amount of overriding
