@@ -183,7 +183,7 @@ as the entrypoint functions.
 Command -- [``wb c``]
 ---------------------
 
-The `command` command is the equivalent of ``bash -ic <workbench>``. It
+The `command` command is the equivalent of ``bash -c <workbench>``. It
 executes the `workbench` non-interactively, with ``WORKBENCH_COMMAND_FUNC``
 as the entrypoint.
 

@@ -23,7 +23,7 @@ consumes in its configuration.
 +---------------------------+------------------------+--------------------------------------------------------+
 | WORKBENCH_ACTIVATE_CMD    | /bin/bash --rcfile     | Command to invoke subshell in intereactive mode        |
 +---------------------------+------------------------+--------------------------------------------------------+
-| WORKBENCH_COMMAND_CMD     | /bin/bash -ic          | Command to invoke a script in non-interactive mode     |
+| WORKBENCH_COMMAND_CMD     | /bin/bash -c           | Command to invoke a script in non-interactive mode     |
 +---------------------------+------------------------+--------------------------------------------------------+
 | WORKBENCH_ACTIVATE_FUNC   | workbench_OnActivate   | Entrypoint function name for the on `activate` command |
 +---------------------------+------------------------+--------------------------------------------------------+
