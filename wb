@@ -270,17 +270,30 @@ _wb_compose_source () {
     local resourceFile="$1"
     local srcPath="$(printf "%s\n" ${resourceFile#${WORKBENCH_HOME}} \
                    | sed 's|^/||g')"
+    local srcDir="$(dirname ${srcPath})"
     local root="${WORKBENCH_HOME}"
-    local chain="${WORKBENCH_HOME}"
-    for part in $(set -f; IFS=/; printf "%s\n" ${srcPath}); do
-        if [[ -f "${root}/${WORKBENCH_SHELF_FILE}" ]]; then
-            printf "source \"${root}/${WORKBENCH_SHELF_FILE}\"\n"
-        fi
+    local chain
+
+    if [[ -f "${root}/${WORKBENCH_SHELF_FILE}" ]]; then
+        printf "source \"${root}/${WORKBENCH_SHELF_FILE}\"\n"
+
+        # ":" suffix is OK as a bench will be appended as the last value
+        chain="${chain}${root}/${WORKBENCH_SHELF_FILE}:"
+    fi
+
+    for part in $(set -f; IFS=/; printf "%s\n" ${srcDir}); do
         root="${root}/${part}"
-        chain="${chain}:${root}"
+        local shelfFile="${root}/${WORKBENCH_SHELF_FILE}"
+        if [[ -f "${shelfFile}" ]]; then
+            printf "source \"${shelfFile}\"\n"
+            chain="${chain}${shelfFile}:"
+        fi
     done
+
     printf "source \"${resourceFile}\"\n"
-    printf "export WORKBENCH_CHAIN='${chain}'\n"
+    chain="${chain}${resourceFile}"
+    printf "export WORKBENCH_CHAIN='${chain}'"
+    echo
 }
 _wb_compose_code () {
     local resourceName="$1"

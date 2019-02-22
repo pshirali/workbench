@@ -407,6 +407,7 @@ class TestWbExecute(unittest.TestCase):
             "export WORKBENCH_ENV_NAME=",
             "export ORIG_PS1=",
             "export PS1=",
+            "export WORKBENCH_CHAIN=",
             "export WORKBENCH_ACTIVATE_FUNC=",
             "export WORKBENCH_COMMAND_FUNC=",
             "export WORKBENCH_NEW_FUNC=",
@@ -425,6 +426,47 @@ class TestWbExecute(unittest.TestCase):
             if not found:
                 self.fail("Did not find '{}' in dump".format(m))
         self.assertEqual(o.returncode, 0)
+
+    def test_workbench_chain_contents(self):
+        o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
+                "WORKBENCH_COMMAND_FUNC=echo "
+                "{wb} c outer/inner/simple1 \$WORKBENCH_CHAIN")
+        hm = join(TESTDATA, "wbhome", "simple")
+        stdout = o.stdout.strip().split()[-1]           # tail -n 1
+        pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
+        self.assertEqual(pt, [
+            "/wb.shelf",
+            "/outer/wb.shelf",
+            "/outer/inner/wb.shelf",
+            "/outer/inner/simple1.bench"
+        ])
+        self.assertEqual(o.returncode, 0)
+
+    def test_workbench_chain_contents_for_different_cases(self):
+        wb_data = [
+            # bench, expected output
+            (
+                "noshelf/noshelf",
+                ["/noshelf/noshelf.bench"]
+            ),
+            (
+                "shelfbench/bench",
+                ["/shelfbench/wb.shelf", "/shelfbench/bench.bench"]),
+            (
+                "skipshelf/skip/bench",
+                ["/skipshelf/wb.shelf", "/skipshelf/skip/bench.bench"]
+            ),
+        ]
+        for (bench, source_list) in wb_data:
+            o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/chain "
+                    "WORKBENCH_COMMAND_FUNC=echo "
+                    "{wb} c {bench} \$WORKBENCH_CHAIN",
+                    replace=dict(bench=bench))
+            hm = join(TESTDATA, "wbhome", "chain")
+            stdout = o.stdout.strip().split()[-1]       # tail -n 1
+            pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
+            self.assertEqual(pt, source_list)
+            self.assertEqual(o.returncode, 0)
 
     def test_invoke_command_on_bench(self):
         """
