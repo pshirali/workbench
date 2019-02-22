@@ -485,64 +485,56 @@ class TestWbExecute(unittest.TestCase):
         wb w <benchName>
         Activate -> exit
 
-        NOTE: This test can hang if exit fails. TODO: Implement a failsafe
+        NOTE: No stdout here.
         """
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} a outer/inner/simple1",
                 input="exit\n", encoding="ascii")
         self.assertEqual(o.returncode, 0)
 
-    # -------- TODO ---------
-    # The tests below work fine on Bash5 (tested on OSX)
-    # They hang on bash 4.3.(48). Tested with Ubuntu:16.04 via docker.
-    # Hence, they also hang on CircleCI and TravisCI.
-    # Investigate further ...
+    def test_workbench_command_override_and_deactivate_on_exit(self):
+        """
+        Test with wb a <benchName>
+        WORKBENCH_DEACTIVATE must get called on 'exit'
 
-    # def test_workbench_command_override_and_deactivate_on_exit(self):
-    #     """
-    #     Test with wb a <benchName>
-    #     WORKBENCH_DEACTIVATE must get called on 'exit'
+        Specifically designed for contents of outer/inner/simple1
+        Test this with `wb c` in non-interative manner to verify stdout
+        """
+        o = run("WORKBENCH_ENV_NAME= "
+                "WORKBENCH_COMMAND_FUNC=exit "
+                "WORKBENCH_HOME={td}/wbhome/simple "
+                "{wb} c outer/inner/simple1 1 2 3")
+        stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
+        self.assertEqual(
+            stdout,
+            ["ROOT", "OUTER", "INNER", "SIMPLE1", "Default-Deactivated"]
+        )
 
-    #     Specifically designed for contents of outer/inner/simple1
-    #     workbench_OnActivate -> exit -> workbench_OnDeactivate
-    #     """
-    #     o = run("WORKBENCH_ENV_NAME= "
-    #             "WORKBENCH_COMMAND_FUNC=workbench_OnActivate "
-    #             "WORKBENCH_HOME={td}/wbhome/simple "
-    #             "{wb} a outer/inner/simple1 1 2 3")
-    #     stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
-    #     self.assertEqual(
-    #         stdout,
-    #         ["ROOT", "OUTER", "INNER", "SIMPLE1",
-    #          "Default-Activated 1 2 3", "Default-Deactivated"]
-    #     )
+    def test_workbench_new_get_invoked(self):
+        """
+        wb n <newBench>
+        Creates a new bench and calls 'workbench_OnNew' as the entrypoint
 
-    # def test_workbench_new_get_invoked(self):
-    #     """
-    #     wb n <newBench>
-    #     Creates a new bench and calls 'workbench_OnNew' as the entrypoint
+        'workbench_OnNew' is written to 'wbhome/rm_test_new/wb.bench'
+        The bench that is executed is 'wbhome/rm_test_new/nested/new_one.bench'
+        The 'workbench_OnNew' from the last sourced file (rm_test_new) will
+        take effect.
+        """
+        rm_test_dir = join(TESTDATA, "wbhome/rm_test_new")
+        try:
+            if exists(rm_test_dir) and isdir(rm_test_dir):
+                shutil.rmtree(rm_test_dir)
+            shelf_file = get_shelf_filename(rm_test_dir, "")
+            makedirs(rm_test_dir, exist_ok=True)
+            with open(shelf_file, "w") as f:
+                f.write("workbench_OnNew () { echo \"Default-New\" $@; }\n")
 
-    #     'workbench_OnNew' is written to 'wbhome/rm_test_new/wb.bench'
-    #     The bench that is executed is 'wbhome/rm_test_new/nested/new_one.bench'
-    #     The 'workbench_OnNew' from the last sourced file (rm_test_new) will
-    #     take effect.
-    #     """
-    #     rm_test_dir = join(TESTDATA, "wbhome/rm_test_new")
-    #     try:
-    #         if exists(rm_test_dir) and isdir(rm_test_dir):
-    #             shutil.rmtree(rm_test_dir)
-    #         shelf_file = get_shelf_filename(rm_test_dir, "")
-    #         makedirs(rm_test_dir, exist_ok=True)
-    #         with open(shelf_file, "w") as f:
-    #             f.write("workbench_OnNew () { echo \"Default-New\" $@; }\n")
-
-    #         o = run("WORKBENCH_ENV_NAME= "
-    #                 "WORKBENCH_HOME={td}/wbhome/rm_test_new "
-    #                 "{wb} n nested/new_one 1 2 3")
-    #         self.assertEqual(o.stdout.strip(), "Default-New 1 2 3")
-    #     finally:
-    #         shutil.rmtree(rm_test_dir)
-
+            o = run("WORKBENCH_ENV_NAME= "
+                    "WORKBENCH_HOME={td}/wbhome/rm_test_new "
+                    "{wb} n nested/new_one 1 2 3")
+            self.assertEqual(o.stdout.strip(), "Default-New 1 2 3")
+        finally:
+            shutil.rmtree(rm_test_dir)
 
 
 # -----------------------------------------------------------------------------
