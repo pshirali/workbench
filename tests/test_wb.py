@@ -61,13 +61,26 @@ GET_FILENAME = {
 }
 
 
-def show_meta():
-    print("----- [ meta ] -----")
+def show_bash():
+    print("----- [ bash ] -----")
     print(run("{}{}".format(EXECUTOR, EXECUTOR_VERSION_FLAG)).stdout)
     print("-----")
 
+def show_python():
+    print("----- [ python ] -----")
+    import sys
+    print(sys.version)
+    print("-----")
 
-show_meta()
+def check_realpath():
+    o = run("realpath --help")
+    if o.returncode != 0:
+        print("'realpath' from GNU Coreutils is missing. Can't run tests.")
+        exit(1)
+
+show_python()
+show_bash()
+check_realpath()
 
 
 # -----------------------------------------------------------------------------
@@ -535,6 +548,33 @@ class TestWbExecute(unittest.TestCase):
             self.assertEqual(o.stdout.strip(), "Default-New 1 2 3")
         finally:
             shutil.rmtree(rm_test_dir)
+
+    def test_realpath_prevents_sourcing_outside_of_workbench_home(self):
+        """
+        With 'realpath' is found on the system, paths which try to source
+        code from outside WORKBENCH_HOME using ../ will result in an error
+        """
+        o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
+                "{wb} c ../outer/inner/simple1")
+        self.assertEqual(o.stdout, "")
+        self.assertEqual(o.returncode, ERR_INVALID)
+
+    def test_disable_realpath_using_env_var(self):
+        """
+        'realpath' can be disabled by setting WORKBENCH_ALLOW_INSECURE_PATH
+        (Not recommended for general use)
+        """
+        o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple/outer "
+                "WORKBENCH_ALLOW_INSECURE_PATH=1 "
+                "{wb} c ../outer/inner/simple1")
+        stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
+
+        # here "ROOT" comes from wbhome/simple/wb.shelf. It lies one level
+        # below WORKBENCH_HOME; yet, has been sourced
+        self.assertEqual(stdout,
+            ["OUTER", "ROOT", "OUTER", "INNER", "SIMPLE1", "Default-Command"]
+        )
+        self.assertEqual(o.returncode, 0)
 
 
 # -----------------------------------------------------------------------------
