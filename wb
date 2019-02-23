@@ -44,6 +44,61 @@ ERR_INVALID=4
 ERR_DECLINED=5
 ERR_EXISTS=6
 
+_wb_check_realpath () {
+    realpath --help 2&>1 > /dev/null
+    if [[ $? -ne 0 ]] && [[ -z "${WORKBENCH_ALLOW_INSECURE_PATH}" ]]; then
+        errlog " ┌──────────────────────────────────────────────────────────┐"
+        errlog " │                                                          │"
+        errlog " │                    *** WARNING ***                       │"
+        errlog " │                                                          │"
+        errlog " │  The CLI utility 'realpath' (part of GNU Coreutils) was  │"
+        errlog " │  not found on this system. Please install it.            │"
+        errlog " │                                                          │"
+        errlog " │  Run: 'realpath --help' to verify installation           │"
+        errlog " │                                                          │"
+        errlog " │  For information on security implications, please refer  │"
+        errlog " │  '<section-name>' in WorkBench's docs.                   │"
+        errlog " │                                                          │"
+        errlog " └──────────────────────────────────────────────────────────┘"
+        exit 1
+    fi
+}
+_wb_realpath () {
+    realpath --help 2&>1 > /dev/null
+    if [[ $? -ne 0 ]]; then
+        echo "$1"
+    else
+        [[ ! -z "$1" ]] && realpath -m "$1"
+    fi
+}
+_wb_check_valid_abspath () {
+    if [[ "${1:0:1}" != "/" ]]; then
+        err "Invalid absolute path: '$1'. Does not begin with '/'"
+        return $ERR_INVALID
+    fi
+}
+_wb_print_path_if_child () {
+    realpath --help 2&>1 > /dev/null
+    if [[ $? -eq 0 ]] && [[ -z "${WORKBENCH_ALLOW_INSECURE_PATH}" ]]; then
+        local ret
+        local toCheck="$(_wb_realpath $1)"
+        local prefix="$(_wb_realpath $2)"
+        _wb_check_valid_abspath "$toCheck"
+        ret=$?
+        [[ $ret -ne 0 ]] && return $ret
+        _wb_check_valid_abspath "$prefix"
+        ret=$?
+        [[ $ret -ne 0 ]] && return $ret
+        local prefixLen=${#prefix}
+        local toCheckPrefix="${toCheck:0:$prefixLen}"
+        if [[ "$toCheckPrefix" != "$prefix" ]]; then
+            err "Item '${toCheck}' lies outside '${prefix}'. Disallowed."
+            return $ERR_INVALID
+        fi
+        echo "${toCheck}"
+    fi
+}
+
 _wb_consume_rcfile () {
     local wbrc="${HOME}/.workbenchrc"
     if [[ -z "${WORKBENCH_RC}" ]] && [[ ! -z "${HOME}" ]] && [[ -f "${wbrc}" ]]
@@ -117,7 +172,9 @@ _wb_file_for_shelf () {
     fi
     stripName="$(echo $1 | sed 's|^/*||g' | sed 's|/*$||g')"
     [[ ! -z "${stripName}" ]] && stripName="${stripName}/"
-    echo "${WORKBENCH_HOME}/${stripName}${WORKBENCH_SHELF_FILE}"
+    local shelfFile="${WORKBENCH_HOME}/${stripName}${WORKBENCH_SHELF_FILE}"
+    _wb_print_path_if_child "${shelfFile}" "${WORKBENCH_HOME}"
+    return $?
 }
 
 _wb_file_for_bench () {
@@ -128,7 +185,9 @@ _wb_file_for_bench () {
         return $ERR_INVALID
     fi
     local stripName="$(echo $1 | sed 's|^/*||g')"
-    echo "${WORKBENCH_HOME}/${stripName}.${WORKBENCH_BENCH_EXTN}"
+    local benchFile="${WORKBENCH_HOME}/${stripName}.${WORKBENCH_BENCH_EXTN}"
+    _wb_print_path_if_child "${benchFile}" "${WORKBENCH_HOME}"
+    return $?
 }
 
 _wb_do_vars () { set | ${WORKBENCH_GREPPER} "^WORKBENCH_\w+=" | sort; }
@@ -466,6 +525,8 @@ EOF
 }
 main () {
     _wb_consume_rcfile
+    _wb_check_realpath
+    WORKBENCH_HOME=$(_wb_realpath "${WORKBENCH_HOME}")
     WORKBENCH_HOME="$(echo ${WORKBENCH_HOME} | sed 's|/*$||g')"
     _wb_init_workbench_home
     if [[ -z "$1" ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
