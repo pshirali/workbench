@@ -1,0 +1,4 @@
+workbench_pre_execute_hook () {
+    echo "pre_execute_hook"
+    return 22                # non-obvious returncode; update in test too!
+}
