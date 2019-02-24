@@ -45,7 +45,7 @@ ERR_DECLINED=5
 ERR_EXISTS=6
 
 _wb_check_realpath () {
-    realpath --help 2&>1 > /dev/null
+    realpath --help 2> /dev/null 1> /dev/null
     if [[ $? -ne 0 ]] && [[ -z "${WORKBENCH_ALLOW_INSECURE_PATH}" ]]; then
         errlog " ┌──────────────────────────────────────────────────────────┐"
         errlog " │                                                          │"
@@ -64,7 +64,7 @@ _wb_check_realpath () {
     fi
 }
 _wb_realpath () {
-    realpath --help 2&>1 > /dev/null
+    realpath --help 2> /dev/null 1> /dev/null
     if [[ $? -ne 0 ]]; then
         echo "$1"
     else
@@ -79,7 +79,7 @@ _wb_check_valid_abspath () {
 }
 _wb_print_path_if_child () {
     if [[ -z "${WORKBENCH_ALLOW_INSECURE_PATH}" ]]; then
-        realpath --help 2&>1 > /dev/null
+        realpath --help 2> /dev/null 1> /dev/null
         if [[ $? -eq 0 ]]; then
             local ret
             local toCheck="$(_wb_realpath $1)"
