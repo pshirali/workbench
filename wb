@@ -474,6 +474,7 @@ _wb_do_execute () {
             _wb_compose_code "${resourceName}" "${resourceFile}" \
                              "${cmd}" "$@" > "${tmpFile}"
             ${executor} "${tmpFile}"
+            rm -f "${tmpFile}"
         fi
     fi
 }
