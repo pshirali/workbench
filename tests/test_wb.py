@@ -574,6 +574,13 @@ class TestWbExecute(unittest.TestCase):
         )
         self.assertEqual(o.returncode, 0)
 
+    def test_pre_execute_hook_execution(self):
+        o = run("WORKBENCH_RC={td}/rctest/pre_exec_hook.rc "
+                "WORKBENCH_HOME={td}/wbhome/chain/noshelf "
+                "{wb} c noshelf")
+        self.assertEqual(o.stdout.strip(), "pre_execute_hook")
+        self.assertEqual(o.returncode, 22)
+
 
 # -----------------------------------------------------------------------------
 #

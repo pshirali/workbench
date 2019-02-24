@@ -43,6 +43,19 @@ ERR_INVALID=4
 ERR_DECLINED=5
 ERR_EXISTS=6
 
+
+# The `workbench_pre_execute_hook` is a function that gets called just before
+# a workbench executes. This allows code in `workbench_pre_execute_hook` to
+# perform any user-defined-checks; for example: detect changes in
+# WORKBENCH_HOME.
+#
+# The function in WorkBench is a no-op. The WORKBENCH_RC is expected to
+# override this function. WorkBench will exit with the returnCode from
+# `workbench_pre_execute_hook` if the returnCode is non-zero.
+#
+workbench_pre_execute_hook () { :; }
+
+
 _wb_check_realpath () {
     realpath --help 2> /dev/null 1> /dev/null
     if [[ $? -ne 0 ]] && [[ -z "${WORKBENCH_ALLOW_INSECURE_PATH}" ]]; then
@@ -450,6 +463,10 @@ _wb_do_execute () {
             c) executor="${WORKBENCH_COMMAND_CMD}";;
             n) executor="${WORKBENCH_COMMAND_CMD}";;
         esac
+
+        workbench_pre_execute_hook
+        local exitCode=$?
+        [[ $exitCode -ne 0 ]] && exit $exitCode
 
         resourceName="$(echo ${resourceName} | sed 's|^/*||g')"
         if [[ ${dumpCode} == "1" ]]; then
