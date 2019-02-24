@@ -34,7 +34,6 @@ WORKBENCH_ACTIVATE_CMD="${WORKBENCH_ACTIVATE_CMD:-/bin/bash --rcfile}"
 WORKBENCH_COMMAND_CMD="${WORKBENCH_COMMAND_CMD:-/bin/bash -c}"
 
 WORKBENCH_ACTIVATE_FUNC="${WORKBENCH_ACTIVATE_FUNC:-workbench_OnActivate}"
-WORKBENCH_DEACTIVATE_FUNC="${WORKBENCH_DEACTIVATE_FUNC:-workbench_OnDeactivate}"
 WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC:-workbench_OnCommand}"
 WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC:-workbench_OnNew}"
 
@@ -323,16 +322,13 @@ if [[ ! -z "\${WORKBENCH_ENV_NAME}" ]]; then
 fi
 workbench_OnNew () { echo \$@; }
 workbench_OnActivate () { :; }
-workbench_OnDeactivate () { :; }
 workbench_OnCommand () { "\$@"; }
-exit () { "\${WORKBENCH_DEACTIVATE_FUNC}"; builtin exit \$? 2> /dev/null; }
 export WORKBENCH_ENV_NAME="${resourceName}"
 export ORIG_PS1="\${PS1}"
 export PS1="[\${WORKBENCH_ENV_NAME}] \${PS1}"
 export WORKBENCH_ACTIVATE_FUNC="${WORKBENCH_ACTIVATE_FUNC}"
 export WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC}"
 export WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC}"
-export WORKBENCH_DEACTIVATE_FUNC="${WORKBENCH_DEACTIVATE_FUNC}"
 # ------------------------------------------------------------
 EOF
 }

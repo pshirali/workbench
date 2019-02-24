@@ -167,17 +167,20 @@ spawns a subshell with the auto-generated `workbench`, with
 Nested `activations` are prevented by checking if ``WORKBENCH_ENV_NAME`` has
 already been set.
 
-The variable ``WORKBENCH_DEACTIVATE_FUNC`` is a `exit-hook` which holds
-the function name that is meant to be called when the subshell is `exited`.
-The default value for ``WORKBENCH_DEACTIVATE_FUNC`` is ``workbench_OnDeactivate``.
-This provides a way to execute some code on deactivation.
+Deactivating a `workbench` is done by simply running `exit`.
 
-The `INIT` section of the `workbench` has ``exit`` redeclared
-as a function, which calls ``WORKBENCH_DEACTIVATE_FUNC`` before calling the
-shell's `builtin exit`.
+Occasionally, there may be cases where some code needs to be executed when
+an `exit` is issued. This can be achieved by redeclaring the `exit` function,
+calling user-defined code, followed by calling `builtin exit`.
 
-The ``WORKBENCH_DEACTIVATE_FUNC`` can be overridden in the same manner
-as the entrypoint functions.
+**Example:**
+
+.. code::
+
+    exit () {
+        <your-deactivation-code-goes-here>
+        builtin exit $? 2> /dev/null
+    }
 
 
 Command -- [``wb c``]
