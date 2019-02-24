@@ -414,9 +414,7 @@ class TestWbExecute(unittest.TestCase):
         mandatory = [
             "workbench_OnNew () {",
             "workbench_OnActivate () {",
-            "workbench_OnDeactivate () {",
             "workbench_OnCommand () {",
-            "exit () {",
             "export WORKBENCH_ENV_NAME=",
             "export ORIG_PS1=",
             "export PS1=",
@@ -424,7 +422,6 @@ class TestWbExecute(unittest.TestCase):
             "export WORKBENCH_ACTIVATE_FUNC=",
             "export WORKBENCH_COMMAND_FUNC=",
             "export WORKBENCH_NEW_FUNC=",
-            "export WORKBENCH_DEACTIVATE_FUNC=",
         ]
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} c --dump outer/inner/simple1")
@@ -508,7 +505,8 @@ class TestWbExecute(unittest.TestCase):
     def test_workbench_command_override_and_deactivate_on_exit(self):
         """
         Test with wb a <benchName>
-        WORKBENCH_DEACTIVATE must get called on 'exit'
+        'exit' has been overridden to execute additional code before
+        builtin exit is triggered
 
         Specifically designed for contents of outer/inner/simple1
         Test this with `wb c` in non-interative manner to verify stdout

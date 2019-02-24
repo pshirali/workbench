@@ -27,8 +27,6 @@ consumes in its configuration.
 +---------------------------+------------------------+--------------------------------------------------------+
 | WORKBENCH_ACTIVATE_FUNC   | workbench_OnActivate   | Entrypoint function name for the on `activate` command |
 +---------------------------+------------------------+--------------------------------------------------------+
-| WORKBENCH_DEACTIVATE_FUNC | workbench_OnDeactivate | Exit-hook called when exiting a subshell               |
-+---------------------------+------------------------+--------------------------------------------------------+
 | WORKBENCH_COMMAND_FUNC    | workbench_OnCommand    | Entrypoint function name for the `command` command     |
 +---------------------------+------------------------+--------------------------------------------------------+
 | WORKBENCH_NEW_FUNC        | workbench_OnNew        | Entrypoint function name for the `new` command         |

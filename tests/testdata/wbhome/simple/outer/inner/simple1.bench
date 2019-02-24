@@ -5,6 +5,7 @@ workbench_OnActivate () {
 workbench_OnCommand () {
     echo "Default-Command" $@
 }
-workbench_OnDeactivate () {
+exit () {
     echo "Default-Deactivated"
+    builtin exit
 }
