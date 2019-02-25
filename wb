@@ -2,19 +2,19 @@
 
 # -----------------------------------------------------------------------------
 #
-# Copyright 2019 Praveen G Shirali <praveengshirali@gmail.com>
+#   Copyright 2019 Praveen G Shirali <praveengshirali@gmail.com>
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 #
 # -----------------------------------------------------------------------------
 
@@ -44,14 +44,14 @@ ERR_DECLINED=5
 ERR_EXISTS=6
 
 
-# The `workbench_pre_execute_hook` is a function that gets called just before
-# a workbench executes. This allows code in `workbench_pre_execute_hook` to
-# perform any user-defined-checks; for example: detect changes in
-# WORKBENCH_HOME.
+#   The `workbench_pre_execute_hook` is a function that gets called just
+#   before a workbench executes. This allows code in the
+#   `workbench_pre_execute_hook` to perform any user-defined-checks
+#   For example: detect changes in WORKBENCH_HOME.
 #
-# The function in WorkBench is a no-op. The WORKBENCH_RC is expected to
-# override this function. WorkBench will exit with the returnCode from
-# `workbench_pre_execute_hook` if the returnCode is non-zero.
+#   The function in WorkBench is a no-op. The WORKBENCH_RC is expected to
+#   override this function. WorkBench will exit with the returnCode from
+#   `workbench_pre_execute_hook` if the returnCode is non-zero.
 #
 workbench_pre_execute_hook () { :; }
 
@@ -69,7 +69,8 @@ _wb_check_realpath () {
         errlog " │  Run: 'realpath --help' to verify installation           │"
         errlog " │                                                          │"
         errlog " │  For information on security implications, please refer  │"
-        errlog " │  '<section-name>' in WorkBench's docs.                   │"
+        errlog " │  to the 'Using WorkBench > Security' section of          │"
+        errlog " │  WorkBench's documentation at: https://wb.rtfd.io        │"
         errlog " │                                                          │"
         errlog " └──────────────────────────────────────────────────────────┘"
         exit 1
@@ -535,7 +536,8 @@ _wb_show_help () {
      multiple files (called 'shelves'), the last of which represents
      the workspace (called 'bench')
 
-     Read the 'README.md' for a detailed explanation.
+     Refer to the documentation for more details:
+     URL: https://wb.readthedocs.io
 
 
  ══ LICENSE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
