@@ -24,7 +24,6 @@ bash script, and designed to work with minimal dependencies even on
 vanilla \*nix systems.
 
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started:
@@ -41,15 +40,18 @@ vanilla \*nix systems.
    using_wb/subshell
    using_wb/concepts
    using_wb/usage
+   using_wb/environ
+   using_wb/exitcodes
+   using_wb/security
 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Reference:
+   :caption: Developer Notes:
 
-   reference/environ
-   reference/exitcodes
-
+   devnotes/contrib.rst
+   devnotes/testing.rst
+   devnotes/license.rst
 
 
 Indices and tables
