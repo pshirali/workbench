@@ -27,9 +27,9 @@ consumes in its configuration.
 +-------------------------------+------------------------+--------------------------------------------------------+
 | WORKBENCH_COMMAND_CMD         | /bin/bash -c           | Command to invoke a script in non-interactive mode     |
 +-------------------------------+------------------------+--------------------------------------------------------+
-| WORKBENCH_ACTIVATE_FUNC       | workbench_OnActivate   | Entrypoint function name for the on `activate` command |
+| WORKBENCH_ACTIVATE_FUNC       | workbench_OnActivate   | Entrypoint function name for the `activate` command    |
 +-------------------------------+------------------------+--------------------------------------------------------+
-| WORKBENCH_COMMAND_FUNC        | workbench_OnCommand    | Entrypoint function name for the `command` command     |
+| WORKBENCH_RUN_FUNC            | workbench_OnRun        | Entrypoint function name for the `run` command         |
 +-------------------------------+------------------------+--------------------------------------------------------+
 | WORKBENCH_NEW_FUNC            | workbench_OnNew        | Entrypoint function name for the `new` command         |
 +-------------------------------+------------------------+--------------------------------------------------------+

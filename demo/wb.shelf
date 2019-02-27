@@ -19,7 +19,7 @@ RESET="\033[0;0m"
 
 #
 #   Print workbench related information. The 'info' command is available
-#   everywhere, in all workbenches.
+#   in all workbenches.
 #
 info () {
     log
@@ -34,28 +34,6 @@ info () {
         log "      └─  ${HIGH}${part}${RESET}"
     done
     log ""
-}
-
-
-#
-#   Base implementation for `wb c`
-#   Run all supplied "args" as a command inside the workbench.
-#   Useful for debugging.
-#
-#   Example: wb c <benchName> echo $WORKBENCH_ENV_NAME
-#
-workbench_OnCommand () {
-    if [[ -z "$1" ]]; then
-        log
-        log " USAGE:"
-        log "   <command> [[arg]..]"
-        log "       Executes <command> [[arg]..] inside the workbench"
-        log 
-        log " This command is implemented in: $BASH_SOURCE"
-        log
-        builtin exit 0
-    fi
-    $@
 }
 
 
