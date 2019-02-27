@@ -23,7 +23,7 @@ log () { echo -e "$@"; }
 errlog () { >&2 log "$@"; }
 err () { >&2 log "ERROR:" "$@"; }
 
-readonly _WORKBENCH_VERSION=0.0.1
+readonly _WORKBENCH_VERSION=0.1.0
 readonly _PROG="${0##*/}"
 
 WORKBENCH_BENCH_EXTN="${WORKBENCH_BENCH_EXTN:-bench}"
