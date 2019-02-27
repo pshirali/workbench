@@ -85,6 +85,17 @@ check_realpath()
 
 # -----------------------------------------------------------------------------
 #
+#   TESTING NOTES:
+#
+#   Assert in the following order:
+#      Success Cases: (1) stderr=="", (2) returncode==0, success condition
+#      Failure Cases: (1) stdout=="" (if req) (2) returncode !=0
+#                     stderr output is not guaranteed to be stable and is
+#                     not part of the CLI's guarantee. Hence it is not
+#                     tested for string formatting.
+#
+# -----------------------------------------------------------------------------
+#
 #   Tests start here
 #
 # -----------------------------------------------------------------------------
@@ -98,24 +109,27 @@ class TestWbRCFile(unittest.TestCase):
         exists, then source it automatically
         """
         o = run("HOME={td}/rctest {wb} -E")
-        self.assertIn("WORKBENCH_TEST=___default___", o.stdout.split('\n'))
+        self.assertEqual(o.stderr, "")
         self.assertEqual(o.returncode, 0)
+        self.assertIn("WORKBENCH_TEST=___default___", o.stdout.split('\n'))
 
     def test_consume_from_user_supplied_rc(self):
         """
         If a WORKBENCH_RC is defined, then source only supplied file.
         """
         o = run("WORKBENCH_RC={td}/rctest/custom.rc {wb} -E")
-        self.assertIn("WORKBENCH_TEST=___custom___", o.stdout.split('\n'))
+        self.assertEqual(o.stderr, "")
         self.assertEqual(o.returncode, 0)
+        self.assertIn("WORKBENCH_TEST=___custom___", o.stdout.split('\n'))
 
     def test_workbench_on_home_folder_with_no_workbenchrc(self):
         """
         WorkBench must not error if $HOME does not have a .workbenchrc
         """
         o = run("HOME={td}/rctest/emptyfolder {wb} -E")
-        self.assertNotIn("WORKBENCH_TEST=", o.stdout.split('\n'))
+        self.assertEqual(o.stderr, "")
         self.assertEqual(o.returncode, 0)
+        self.assertNotIn("WORKBENCH_TEST=", o.stdout.split('\n'))
 
     def test_non_existent_workbench_rc_file_raises_error(self):
         """
@@ -135,9 +149,10 @@ class TestWbRCFile(unittest.TestCase):
         wb -E must only list env var entries ^WORKBENCH_*
         """
         o = run("HOME={td}/rctest/emptyfolder {wb} -E")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         for entry in o.stdout.strip().split('\n'):
             self.assertTrue(entry.startswith("WORKBENCH_"))
-        self.assertEqual(o.returncode, 0)
 
 
 class TestWbShelfAndBenchOps(unittest.TestCase):
@@ -149,25 +164,27 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
         'wb b' lists all benches in WORKBENCH_HOME
         """
         o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} b")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         benches = set(o.stdout.strip().split('\n'))
         self.assertEqual(benches, set([
             "outer/inner/simple1",
             "outer/inner/simple2"
         ]))
-        self.assertEqual(o.returncode, 0)
 
     def test_list_simple_shelves(self):
         """
         'wb s' lists all shelves in WORKBENCH_HOME
         """
         o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} s")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         shelves = set(o.stdout.strip().split('\n'))
         self.assertEqual(shelves, set([
             "/",
             "outer/",
             "outer/inner/"
         ]))
-        self.assertEqual(o.returncode, 0)
 
     # SHOW PATH TO SHELF AND BENCH FILES
 
@@ -219,8 +236,9 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
 
         o = run("WORKBENCH_HOME={td}/wbhome/simple {wb} {wb_cmd} {name} {cmd}",
                 replace=dict(wb_cmd=wb_cmd, name=name, cmd=cmd))
-        self.assertEqual(expected, o.stdout.strip())
+        self.assertEqual(o.stderr, "")
         self.assertEqual(o.returncode, 0)
+        self.assertEqual(expected, o.stdout.strip())
 
     def test_run_command_on_bench_file(self):
         self._test_command_on_file("b", "outer/inner/simple1")
@@ -287,6 +305,8 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
             o = run("WORKBENCH_HOME={td}/wbhome/rm_test "
                     "{prefix} {wb} {wb_cmd} {name} rm",
                     **kw)
+            self.assertEqual(o.stdout, "")
+            self.assertEqual(o.stderr, "")
             self.assertEqual(o.returncode, ERR_DECLINED)
             self.assertTrue(exists(filename))
 
@@ -297,6 +317,8 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
                     "{prefix} {wb} {wb_cmd} {name} rm",
                     **kw)
 
+            self.assertEqual(o.stdout, "")
+            self.assertEqual(o.stderr, "")
             self.assertEqual(o.returncode, 0)
             self.assertTrue(not exists(filename))
 
@@ -324,6 +346,7 @@ class TestWbShelfAndBenchOps(unittest.TestCase):
                     "{prefix} {wb} {wb_cmd} {name} rm",
                     **kw)
 
+            self.assertEqual(o.stderr, "")
             self.assertEqual(o.returncode, 0)
             self.assertTrue(not exists(filename))
 
@@ -367,12 +390,13 @@ class TestWbExecute(unittest.TestCase):
         o = run("WORKBENCH_ENV_NAME= "
                 "WORKBENCH_HOME={td}/wbhome/simple {wb} {c}",
                 replace=dict(c=c))
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         benches = set(o.stdout.strip().split('\n'))
         self.assertEqual(benches, set([
             "outer/inner/simple1",
             "outer/inner/simple2"
         ]))
-        self.assertEqual(o.returncode, 0)
 
     def test_wb_execute_commands_without_args_list_workbenches(self):
         """
@@ -388,6 +412,7 @@ class TestWbExecute(unittest.TestCase):
         """
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} n outer/inner/simple1")
+        self.assertEqual(o.stdout, "")
         self.assertEqual(o.returncode, ERR_EXISTS)
 
     def _test_dump_verify_magic_string(self):
@@ -397,6 +422,8 @@ class TestWbExecute(unittest.TestCase):
         """
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} {c} outer/inner/simple1", replace=dict(c=c))
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         lines = o.stdout.strip().split('\n')
         for line in lines:
             if "Auto-generated by WorkBench" in line:
@@ -427,8 +454,10 @@ class TestWbExecute(unittest.TestCase):
         ]
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} c --dump outer/inner/simple1")
-        lines = o.stdout.strip().split('\n')
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
 
+        lines = o.stdout.strip().split('\n')
         for m in mandatory:
             found = False
             for line in lines:
@@ -437,12 +466,13 @@ class TestWbExecute(unittest.TestCase):
                     break
             if not found:
                 self.fail("Did not find '{}' in dump".format(m))
-        self.assertEqual(o.returncode, 0)
 
     def test_workbench_chain_contents(self):
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "WORKBENCH_COMMAND_FUNC=echo "
                 "{wb} c outer/inner/simple1 \$WORKBENCH_CHAIN")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         hm = join(TESTDATA, "wbhome", "simple")
         stdout = o.stdout.strip().split()[-1]           # tail -n 1
         pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
@@ -452,7 +482,6 @@ class TestWbExecute(unittest.TestCase):
             "/outer/inner/wb.shelf",
             "/outer/inner/simple1.bench"
         ])
-        self.assertEqual(o.returncode, 0)
 
     def test_workbench_chain_contents_for_different_cases(self):
         wb_data = [
@@ -474,11 +503,13 @@ class TestWbExecute(unittest.TestCase):
                     "WORKBENCH_COMMAND_FUNC=echo "
                     "{wb} c {bench} \$WORKBENCH_CHAIN",
                     replace=dict(bench=bench))
+            self.assertEqual(o.stderr, "")
+            self.assertEqual(o.returncode, 0)
+
             hm = join(TESTDATA, "wbhome", "chain")
             stdout = o.stdout.strip().split()[-1]       # tail -n 1
             pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
             self.assertEqual(pt, source_list)
-            self.assertEqual(o.returncode, 0)
 
     def test_invoke_command_on_bench(self):
         """
@@ -486,11 +517,12 @@ class TestWbExecute(unittest.TestCase):
         """
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} c outer/inner/simple1")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
         self.assertEqual(stdout,
             ["ROOT", "OUTER", "INNER", "SIMPLE1", "Default-Command"]
         )
-        self.assertEqual(o.returncode, 0)
 
     def test_invoke_activate_on_bench(self):
         """
@@ -502,6 +534,7 @@ class TestWbExecute(unittest.TestCase):
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} a outer/inner/simple1",
                 input="exit\n", encoding="ascii")
+        self.assertEqual(o.stderr, "")
         self.assertEqual(o.returncode, 0)
 
     def test_workbench_command_override_and_deactivate_on_exit(self):
@@ -517,6 +550,8 @@ class TestWbExecute(unittest.TestCase):
                 "WORKBENCH_COMMAND_FUNC=exit "
                 "WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} c outer/inner/simple1 1 2 3")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
         self.assertEqual(
             stdout,
@@ -545,6 +580,8 @@ class TestWbExecute(unittest.TestCase):
             o = run("WORKBENCH_ENV_NAME= "
                     "WORKBENCH_HOME={td}/wbhome/rm_test_new "
                     "{wb} n nested/new_one 1 2 3")
+            self.assertEqual(o.stderr, "")
+            self.assertEqual(o.returncode, 0)
             self.assertEqual(o.stdout.strip(), "Default-New 1 2 3")
         finally:
             shutil.rmtree(rm_test_dir)
@@ -567,6 +604,8 @@ class TestWbExecute(unittest.TestCase):
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple/outer "
                 "WORKBENCH_ALLOW_INSECURE_PATH=1 "
                 "{wb} c ../outer/inner/simple1")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
         stdout = [s.strip() for s in o.stdout.split('\n') if s.strip()]
 
         # here "ROOT" comes from wbhome/simple/wb.shelf. It lies one level
@@ -574,14 +613,14 @@ class TestWbExecute(unittest.TestCase):
         self.assertEqual(stdout,
             ["OUTER", "ROOT", "OUTER", "INNER", "SIMPLE1", "Default-Command"]
         )
-        self.assertEqual(o.returncode, 0)
 
     def test_pre_execute_hook_execution(self):
         o = run("WORKBENCH_RC={td}/rctest/pre_exec_hook.rc "
                 "WORKBENCH_HOME={td}/wbhome/chain/noshelf "
                 "{wb} c noshelf")
-        self.assertEqual(o.stdout.strip(), "pre_execute_hook")
+        self.assertEqual(o.stderr, "")
         self.assertEqual(o.returncode, 22)
+        self.assertEqual(o.stdout.strip(), "pre_execute_hook")
 
 
 # -----------------------------------------------------------------------------
