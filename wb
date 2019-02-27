@@ -409,9 +409,14 @@ _wb_help_execute () {
                    Entrypoint:
                     └─ WORKBENCH_COMMAND_FUNC=${WORKBENCH_COMMAND_FUNC}
 
-          n        Create a new workbench by executing shell code from:
+          n        Create a new bench by executing shell code from:
                    Entrypoint:
                     └─ WORKBENCH_NEW_FUNC=${WORKBENCH_NEW_FUNC}
+
+                   NOTE: You need to supply a new <benchName> with
+                         the 'n' command. The command displays existing
+                         benches to help you choose your new <benchName>
+                         by modifying off an existing name.
 
           Arguments [[arg]..] are passed as-is to the entrypoint function.
 
@@ -519,11 +524,11 @@ _wb_show_help () {
     -E     Show WORKBENCH environment variables and quit
 
      s     List shelves. Operate on a shelf file.               [+]
-     b     List workbenches. Operate on a bench file.           [+]
+     b     List benches. Operate on a bench file.               [+]
 
-     a     List workbenches. Activate a workbench.              [+]
-     c     List workbenches. Run a command from a workbench.    [+]
-     n     List workbenches. Create a new workbench             [+]
+     a     List benches. Activate a workbench.                  [+]
+     c     List benches. Run a command from a workbench.        [+]
+     n     List benches. Create a new bench.                    [+]
 
 
  ══ DESCRIPTION ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
@@ -532,9 +537,10 @@ _wb_show_help () {
      You can use it to build project-specific virtualenvs, each having
      its own set of env variables, aliases and functions.
 
-     WorkBench builds an environment by overlaying shell code from
-     multiple files (called 'shelves'), the last of which represents
-     the workspace (called 'bench')
+     WorkBench builds an environment (called 'workbench') by overlaying
+     shell code from files residing at different directory depths (called
+     'shelves') within a WORKBENCH_HOME directory, followed by a file
+     which overrides all shelves (called 'bench').
 
      Refer to the documentation for more details:
      URL: https://wb.readthedocs.io
