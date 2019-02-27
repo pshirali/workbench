@@ -69,4 +69,4 @@ Following items will be taken up in the near future:
 
 ## License
 
-[`Apache 2.0`][LICENSE]
+[`Apache 2.0`](LICENSE)
