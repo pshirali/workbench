@@ -20,6 +20,26 @@ ERR_EXISTS=6
 EXECUTOR="bash"
 EXECUTOR_VERSION_FLAG=" --version"
 
+#
+#   Unset all env vars which might affect wb's functionality. Values for
+#   these might get picked up from the env in which the tests are run.
+#
+CMD_PREFIX=(
+    "HOME={td}/emptyrc "
+    "WORKBENCH_RC= "
+    "WORKBENCH_HOME= "
+    "WORKBENCH_BENCH_EXTN= "
+    "WORKBENCH_SHELF_FILE= "
+    "WORKBENCH_GREPPER= "
+    "WORKBENCH_ACTIVATE_CMD= "
+    "WORKBENCH_COMMAND_CMD= "
+    "WORKBENCH_ACTIVATE_FUNC= "
+    "WORKBENCH_RUN_FUNC= "
+    "WORKBENCH_NEW_FUNC= "
+    "WORKBENCH_AUTOCONFIRM= "
+    "WORKBENCH_ALLOW_INSECURE_PATH= "
+)
+
 
 def run(cmd, **kwargs):
     if not isinstance(cmd, str):
@@ -27,7 +47,7 @@ def run(cmd, **kwargs):
     replace = kwargs.pop("replace", {})
     wb_data = dict(td=TESTDATA, wb="{} {}".format(EXECUTOR, WB))
     wb_data.update(replace)
-    cmd = cmd.format(**wb_data)
+    cmd = CMD_PREFIX.format(**wb_data) + cmd.format(**wb_data)
     run_args = dict(
         shell=True, cwd=WB_DIR, timeout=5,
         stdout=subprocess.PIPE,
