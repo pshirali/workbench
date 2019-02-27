@@ -209,19 +209,24 @@ The `new` command is a variant of the `command` command. It's execution is
 similar to that of the `command` command (non-interactive), but with
 ``WORKBENCH_NEW_FUNC`` as the entrypoint.
 
-The `new` command makes it easy to create new environments. When the command
-``wb n <newBenchName>`` is invoked, WorkBench creates all intermediate
-`shelf` files (if they don't already exist) followed by the `bench`.
+When the command ``wb n <newBenchName>`` is invoked, WorkBench creates
+all intermediate `shelf` files (if they don't already exist) followed by
+the `bench`. The `bench` must either not exist, or must be a zero-byte file.
 
 The last declared function as defined by ``WORKBENCH_NEW_FUNC`` is then
-called, which could interactively setup contents for the new `bench`.
+called, which is expected to write contents into the new `bench`.
 
-A good example for this would be virtual-environments for programming
-languages. For a given programming language, it is possible that the
-procedure to setup a `bench` for a new project/repo would involve a
-common set of steps; where only a few pieces of information (like
-`projectName`, `path`, `URL` etc) might be required from the user.
+Consider a programming language like Python, Go etc. All projects of a
+language would require a common set of steps to build up a workspace for
+the language. For Python, tools like `virtualenv`, with `virtualenvwrapper`
+are already available. Similar tools exist for other languages too.
 
-The `shelf` for a language could implement a ``WORKBENCH_NEW_FUNC`` which
-requests this information for a new project, and auto-generates a `bench`
-with all necessary info.
+It is easy to implement code in a `shelf` to define the behavior for all
+projects for a particular language/group. The code could wrap around an
+existing tool (like `virtualenv`) or provide all functionality by itself.
+
+The aspect that varies between each project of a language might be: (a) Name,
+(b) Project URL, may be (c) language version etc. But, such values are few.
+The `shelf's` implementation of ``WORKBENCH_NEW_FUNC`` could request this
+information for a new project and dump the metadata into the `bench`.
+The `bench` could therefore be minimal; may be an `env` file with key-values.
