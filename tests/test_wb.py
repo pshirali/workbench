@@ -415,6 +415,8 @@ class TestWbExecute(unittest.TestCase):
             "workbench_OnNew () {",
             "workbench_OnActivate () {",
             "workbench_OnCommand () {",
+            "export WORKBENCH_SHELF_FILE=",
+            "export WORKBENCH_BENCH_EXTN=",
             "export WORKBENCH_ENV_NAME=",
             "export ORIG_PS1=",
             "export PS1=",
