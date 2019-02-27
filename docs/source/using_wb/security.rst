@@ -43,7 +43,7 @@ set on the file (similar to your `.bashrc`, `.bash_profile`)
 Depending on values defined against `WORKBENCH_SHELF_FILE` and
 `WORKBENCH_BENCH_EXTN`, all files matching the filename and extension
 respectively within your `WORKBENCH_HOME` are assumed to be shell scripts.
-Code from these files will be sourced when you invoke `wb a`, `wb c` or `wb n`
+Code from these files will be sourced when you invoke `wb a`, `wb r` or `wb n`
 commands. As above, they too don't require the `execute` permission to be
 set on them.
 
@@ -53,7 +53,7 @@ executed within `shelves` or `benches`. It is possible that code
 `WORKBENCH_HOME`, or outside of your `user` directory too.
 
 The name of the `entrypoint` function that WorkBench executes can be
-redefined using `WORKBENCH_ACTIVATE_FUNC`, `WORKBENCH_COMMAND_FUNC` and
+redefined using `WORKBENCH_ACTIVATE_FUNC`, `WORKBENCH_RUN_FUNC` and
 `WORKBENCH_NEW_FUNC` respectively. Depending on the command invoked, the
 control will land on one of these functions.
 
@@ -64,7 +64,7 @@ an existing definition in your current shell (parent shell).
 
 .. code::
 
-    WORKBENCH_COMMAND_FUNC=echo wb c <benchName> Hello World
+    WORKBENCH_RUN_FUNC=echo wb r <benchName> Hello World
 
     Will print "Hello World" in the last line of the command's output.
 
@@ -116,9 +116,9 @@ Canonical paths and directory traversal
 
 
 WorkBench uses the ``realpath`` (GNU) utility to convert all relative paths to
-absolute canonical paths before operating on them. WorkBench ensures that
-every `shelf` and `bench` that gets sourced as part of building a `workbench`,
-also reside within ``WORKBENCH_HOME``.
+absolute paths before operating on them. WorkBench ensures that every `shelf`
+and `bench` that gets sourced as part of building a `workbench`, also reside
+within ``WORKBENCH_HOME``.
 
 .. important::
 
@@ -150,7 +150,7 @@ largely to prevent inadvertent sourcing of content.
 A directory traversal attack involves a `path` derived from user input which
 includes ``../``. This indicates the parent of the intended directory.
 With directory traversal checks disabled, one could supply a command like:
-``wb c ../benchName`` to access a `shelf` and a `bench` that is located at
+``wb r ../benchName`` to access a `shelf` and a `bench` that is located at
 the parent directory of ``WORKBENCH_HOME``. The input could include multiple
 ``../`` to craft a `path` that points to any other file on your drive.
 
@@ -158,8 +158,7 @@ the parent directory of ``WORKBENCH_HOME``. The input could include multiple
 
     WorkBench strips preceeding ``/`` from `shelf` and `bench` names,
     and makes them relative to `WORKBENCH_HOME`. This handles the
-    case of `shelf` or `bench` names supplied in the form of an absolute
-    path.
+    case of input `shelf` or `bench` names supplied as absolute paths.
 
 
 Temp files
@@ -167,7 +166,7 @@ Temp files
 
 
 WorkBench creates temp files with the auto-generated `workbench` contents
-when the commands ``wb a``, ``wb c``, ``wb n`` are executed without the
+when the commands ``wb a``, ``wb r``, ``wb n`` are executed without the
 ``--dump`` switch. The temp files are created using ``mktemp`` utility.
 This creates a file within ``/tmp`` with the content that you see in the
 ``--dump`` switch. The temp files have a default permission `0600` which

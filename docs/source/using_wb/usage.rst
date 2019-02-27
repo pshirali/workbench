@@ -80,7 +80,7 @@ Auto-generated `workbench` and Entrypoints
 
 
 A `workbench` is the auto-generated code composed by WorkBench (the tool),
-when the command ``wb a|c|n <benchName>`` is executed.
+when the command ``wb a|r|n <benchName>`` is executed.
 
 The switch ``--dump`` can be used to print the auto-generated code on `stdout`
 instead of executing it. The ``--dump`` switch does not validate the presence
@@ -124,7 +124,7 @@ function names associated with each of them.
 +============+===========================+========================+=========+
 | entrypoint | WORKBENCH_ACTIVATE_FUNC   | workbench_OnActivate   | a       |
 +------------+---------------------------+------------------------+---------+
-| entrypoint | WORKBENCH_COMMAND_FUNC    | workbench_OnCommand    | c       |
+| entrypoint | WORKBENCH_RUN_FUNC        | workbench_OnRun        | r       |
 +------------+---------------------------+------------------------+---------+
 | entrypoint | WORKBENCH_NEW_FUNC        | workbench_OnNew        | n       |
 +------------+---------------------------+------------------------+---------+
@@ -136,25 +136,35 @@ the `shelf` or the `bench` to point to a non-default function as well.
 Entrypoint Example
 ------------------
 
-When ``wb c <benchName> arg1 arg2`` is executed, then the function that
-maps to ``WORKBENCH_COMMAND_FUNC`` becomes the actual entrypoint.
-The default entrypoint function name is ``workbench_OnCommand`` and the
+When ``wb r <benchName> arg1 arg2`` is executed, then the function that
+maps to ``WORKBENCH_RUN_FUNC`` becomes the actual entrypoint.
+The default entrypoint function name is ``workbench_OnRun`` and the
 `INIT` section has an implemetation for it.
 
-A `shelf` or `bench` could redeclare ``workbench_OnCommand`` multiple times;
+A `shelf` or `bench` could redeclare ``workbench_OnRun`` multiple times;
 in files at different depths. The last declared implementation will be the one
 that executes with arguments ``arg`` ``arg2``
 
-It is also possible that ``WORKBENCH_COMMAND_FUNC`` could be assigned a new
+It is also possible that ``WORKBENCH_RUN_FUNC`` could be assigned a new
 value like ``my_custom_func`` anywhere in the `shelves` or the `bench`.
-The last declared value of ``WORKBENCH_COMMAND_FUNC`` is now the new
+The last declared value of ``WORKBENCH_RUN_FUNC`` is now the new
 entrypoint function, and the last declared implementation of the
 function ``my_custom_func`` is the one that executes with
 arguments ``arg1`` ``arg2``
 
 
-Executing `workbench` environments -- [``wb a``, ``wb c``, ``wb n``]
+Executing `workbench` environments -- [``wb a``, ``wb r``, ``wb n``]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+The `workbench` stores the execution command in the varible
+``WORKBENCH_EXEC_MODE``. `Shelf` and `Bench` code could take decisions
+based on this value.
+
+A no-op function ``workbench_pre_execute_hook`` executes just before
+a `workbench` is built. This function could be implemented by the
+``WORKBENCH_RC`` with logic that decides whether to go ahead with
+execution. Refer to the `Security` chapter for more details.
 
 
 Activate -- [``wb a``]
@@ -183,30 +193,28 @@ calling user-defined code, followed by calling `builtin exit`.
     }
 
 
-Command -- [``wb c``]
----------------------
+Run -- [``wb r``]
+-----------------
 
-The `command` command is the equivalent of ``bash -c <workbench>``. It
-executes the `workbench` non-interactively, with ``WORKBENCH_COMMAND_FUNC``
-as the entrypoint.
-
-The `command` command is used to invoke one-off commands which may be defined
-in the `workbench`, but don't necessarily require an interactive subshell.
+The `run` command is the equivalent of ``bash -c <workbench>``. It
+executes the `workbench` non-interactively, with ``WORKBENCH_RUN_FUNC``
+as the entrypoint. The `run` command is used to invoke one-off commands
+which may be defined in the `workbench`.
 
 For example, a `workbench` could declare subcommands like ``start``, ``stop``,
 ``build``, ``deploy`` etc, as independent functions. The entrypoint function
-defined by ``WORKBENCH_COMMAND_FUNC`` could parse arguments and dispatch them
+defined by ``WORKBENCH_RUN_FUNC`` could parse arguments and dispatch them
 to respective subcommands.
 
-Thus, for the same `workbench`, the `Activate` and `Command` commands could be
+Thus, for the same `workbench`, the `activate` and `run` commands could be
 used to trigger different functionality.
 
 
 New -- [``wb n``]
 -----------------
 
-The `new` command is a variant of the `command` command. It's execution is
-similar to that of the `command` command (non-interactive), but with
+The `new` command is a variant of the `run` command. It's execution is
+similar to that of the `run` command (non-interactive), but with
 ``WORKBENCH_NEW_FUNC`` as the entrypoint.
 
 When the command ``wb n <newBenchName>`` is invoked, WorkBench creates

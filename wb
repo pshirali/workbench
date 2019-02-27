@@ -34,7 +34,7 @@ WORKBENCH_ACTIVATE_CMD="${WORKBENCH_ACTIVATE_CMD:-/bin/bash --rcfile}"
 WORKBENCH_COMMAND_CMD="${WORKBENCH_COMMAND_CMD:-/bin/bash -c}"
 
 WORKBENCH_ACTIVATE_FUNC="${WORKBENCH_ACTIVATE_FUNC:-workbench_OnActivate}"
-WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC:-workbench_OnCommand}"
+WORKBENCH_RUN_FUNC="${WORKBENCH_RUN_FUNC:-workbench_OnRun}"
 WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC:-workbench_OnNew}"
 
 ERR_FATAL=1
@@ -336,14 +336,14 @@ if [[ -n "\${WORKBENCH_ENV_NAME}" ]]; then
 fi
 workbench_OnNew () { echo \$@; }
 workbench_OnActivate () { :; }
-workbench_OnCommand () { "\$@"; }
+workbench_OnRun () { "\$@"; }
 export WORKBENCH_SHELF_FILE="${WORKBENCH_SHELF_FILE}"
 export WORKBENCH_BENCH_EXTN="${WORKBENCH_BENCH_EXTN}"
 export WORKBENCH_ENV_NAME="${resourceName}"
 export ORIG_PS1="\${PS1}"
 export PS1="[\${WORKBENCH_ENV_NAME}] \${PS1}"
 export WORKBENCH_ACTIVATE_FUNC="${WORKBENCH_ACTIVATE_FUNC}"
-export WORKBENCH_COMMAND_FUNC="${WORKBENCH_COMMAND_FUNC}"
+export WORKBENCH_RUN_FUNC="${WORKBENCH_RUN_FUNC}"
 export WORKBENCH_NEW_FUNC="${WORKBENCH_NEW_FUNC}"
 # ------------------------------------------------------------
 EOF
@@ -391,7 +391,7 @@ _wb_compose_code () {
     # entrypoint
     case "${cmd}" in
         a) printf '"${WORKBENCH_ACTIVATE_FUNC}"';;
-        c) printf '"${WORKBENCH_COMMAND_FUNC}"';;
+        r) printf '"${WORKBENCH_RUN_FUNC}"';;
         n) printf '"${WORKBENCH_NEW_FUNC}"';;
     esac
     if [[ -n "${@:4}" ]]; then
@@ -410,9 +410,9 @@ _wb_help_execute () {
                    Entrypoint:
                     └─ WORKBENCH_ACTIVATE_FUNC=${WORKBENCH_ACTIVATE_FUNC}
 
-          c        Run a command from a workbench in the current shell
+          r        Run a command from a workbench in the current shell
                    Entrypoint:
-                    └─ WORKBENCH_COMMAND_FUNC=${WORKBENCH_COMMAND_FUNC}
+                    └─ WORKBENCH_RUN_FUNC=${WORKBENCH_RUN_FUNC}
 
           n        Create a new bench by executing shell code from:
                    Entrypoint:
@@ -436,7 +436,7 @@ _wb_help_execute () {
 EOF
 }
 _wb_do_execute () {
-    local cmd="$1"; shift                # command: a|c|n
+    local cmd="$1"; shift                # command: a|r|n
     [[ "$1" = "-h" ]] || [[ "$1"  = "--help" ]] && _wb_help_execute && exit 0
     local dumpCode
     case "$1" in
@@ -471,7 +471,7 @@ _wb_do_execute () {
         local executor
         case "${cmd}" in
             a) executor="${WORKBENCH_ACTIVATE_CMD}";;
-            c) executor="${WORKBENCH_COMMAND_CMD}";;
+            r) executor="${WORKBENCH_COMMAND_CMD}";;
             n) executor="${WORKBENCH_COMMAND_CMD}";;
         esac
 
@@ -532,7 +532,7 @@ _wb_show_help () {
      b     List benches. Operate on a bench file.               [+]
 
      a     List benches. Activate a workbench.                  [+]
-     c     List benches. Run a command from a workbench.        [+]
+     r     List benches. Run a command from a workbench.        [+]
      n     List benches. Create a new bench.                    [+]
 
 
@@ -580,7 +580,7 @@ main () {
         b) shift; _wb_do_operate "bench" "$@";;
 
         a) shift; _wb_do_execute "a" "$@";;
-        c) shift; _wb_do_execute "c" "$@";;
+        r) shift; _wb_do_execute "r" "$@";;
         n) shift; _wb_do_execute "n" "$@";;
 
         *) err "Unknown command '$1'. Run '${_PROG} -h' for help." && exit 1;;

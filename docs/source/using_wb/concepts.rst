@@ -144,7 +144,7 @@ Benefits
 
 
 1. Overall there is less code to maintain.
-2. It is easy influence control on a whole group of environments by moving
+2. It is easy to influence control on a whole group of environments by moving
    code to a ``Shelf`` at the appropriate subdirectory
 3. Redeclaration results in overriding. Code in a `shelf` at a deeper depth  
    overrides those at lower depths (closer to ``WORKBENCH_HOME``). Code in
