@@ -622,6 +622,20 @@ class TestWbExecute(unittest.TestCase):
         self.assertEqual(o.returncode, 22)
         self.assertEqual(o.stdout.strip(), "pre_execute_hook")
 
+    def test_workbench_exec_mode(self):
+        """
+        WORKBENCH_EXEC_MODE takes the value "a" | "c" | "n"
+        depending on the command with which the workbench was
+        invoked.
+        """
+        for cmd in ["a", "c", "n"]:
+            o = run("WORKBENCH_ACTIVATE_CMD='{executor} -c' "
+                    "WORKBENCH_HOME={td}/execmode wb {cmd} execmode",
+                    replace=dict(cmd=cmd, executor=EXECUTOR))
+            self.assertEqual(o.stderr, "")
+            self.assertEqual(o.returncode, 0)
+            self.assertEqual(o.stdout.strip(), cmd)
+
 
 # -----------------------------------------------------------------------------
 #

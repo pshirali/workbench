@@ -39,12 +39,14 @@ The table below contains a list of environment variables which are injected as p
 auto-generated `workbench`.
 
 
-+---------------------------+---------------------------------------------------------+
-| Environment Variable Name | Description                                             |
-+===========================+=========================================================+
-| WORKBENCH_ENV_NAME        | Name of the currently active `bench`                    |
-+---------------------------+---------------------------------------------------------+
-| WORKBENCH_CHAIN           | A ``:`` separated list of every sourced shelf and bench |
-+---------------------------+---------------------------------------------------------+
-| ORIG_PS1                  | Stores the existing ``PS1`` before redefining it        |
-+---------------------------+---------------------------------------------------------+
++---------------------------+--------------------------------------------------------------------+
+| Environment Variable Name | Description                                                        |
++===========================+====================================================================+
+| WORKBENCH_ENV_NAME        | Name of the currently active `bench`                               |
++---------------------------+--------------------------------------------------------------------+
+| WORKBENCH_EXEC_MODE       | The mode in which the workbench was launched. One of 'a', 'c', 'n' |
++---------------------------+--------------------------------------------------------------------+
+| WORKBENCH_CHAIN           | A ``:`` separated list of every sourced shelf and bench            |
++---------------------------+--------------------------------------------------------------------+
+| ORIG_PS1                  | Stores the existing ``PS1`` before redefining it                   |
++---------------------------+--------------------------------------------------------------------+

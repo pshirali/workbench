@@ -385,6 +385,9 @@ _wb_compose_code () {
     _wb_compose_initcode "${resourceName}"
     _wb_compose_source   "${resourceFile}"
 
+    # execution mode
+    echo "WORKBENCH_EXEC_MODE=${cmd}"
+
     # entrypoint
     case "${cmd}" in
         a) printf '"${WORKBENCH_ACTIVATE_FUNC}"';;
