@@ -2,5 +2,5 @@ show_mode () {
     echo "$WORKBENCH_EXEC_MODE"
 }
 workbench_OnActivate () { show_mode; }
-workbench_OnCommand () { show_mode; }
+workbench_OnRun () { show_mode; }
 workbench_OnNew () { show_mode; }

@@ -2,8 +2,8 @@ echo "SIMPLE1"
 workbench_OnActivate () {
     echo "Default-Activated" $@
 }
-workbench_OnCommand () {
-    echo "Default-Command" $@
+workbench_OnRun () {
+    echo "Default-Run" $@
 }
 exit () {
     echo "Default-Deactivated"
