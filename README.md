@@ -18,7 +18,7 @@ and easy overall maintenance while managing several hundred environments.
 ![Demo Screencast](asciinema/intro.gif)
 
 
-**Documentation:** [`wb.rtfd.io`](https://wb.rtfd.io)
+## Documentation: [`wb.rtfd.io`](https://wb.rtfd.io)
 
 Refer to the documentation for installation, conceptual overview,
 usage and other reference material.
