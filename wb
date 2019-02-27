@@ -451,7 +451,7 @@ _wb_do_execute () {
 
         if [[ "${dumpCode}" != "1" ]]; then
             if [[ "${cmd}" == "n" ]]; then
-                if [[ -f "${resourceFile}" ]]; then
+                if [[ -s "${resourceFile}" ]]; then
                     err "Bench '${resourceName}' exists: '${resourceFile}'"
                     err "Cannot create a new workbench."
                     exit $ERR_EXISTS
