@@ -1,0 +1,95 @@
+#
+# -----------------------------------------------------------------------------
+#
+#   This is the root `wb.shelf` file. Definitions that apply to all
+#   workbenches are defined in this file.
+#
+# -----------------------------------------------------------------------------
+
+
+demo () { [[ -n "${WORKBENCH_DEMO}" ]] && echo -e "$@"; }
+log () { echo -e "$@"; }
+err () { >&2 log "$@"; }
+
+
+#   We'll use these ANSI colors to highlight specific information
+HIGH="\033[0;93m"           # bright-yellow
+RESET="\033[0;0m"
+
+
+#
+#   Print workbench related information. The 'info' command is available
+#   everywhere, in all workbenches.
+#
+info () {
+    log
+    log "  ${HIGH}info${RESET} is a function declared in WORKBENCH_HOME/wb.shelf"
+    log "  You can call it from any directory as long as the workbench is active."
+    log ""
+    log "  Your current workbench: ${HIGH}${WORKBENCH_ENV_NAME}${RESET}"
+    log "  Your WORKBENCH_HOME is: ${HIGH}${WORKBENCH_HOME}${RESET}"
+    log ""
+    log "  The following shelves and bench have been sourced:"
+    for part in $(set -f; IFS=:; printf "%s\n" ${WORKBENCH_CHAIN}); do
+        log "      └─  ${HIGH}${part}${RESET}"
+    done
+    log ""
+}
+
+
+#
+#   Base implementation for `wb c`
+#   Run all supplied "args" as a command inside the workbench.
+#   Useful for debugging.
+#
+#   Example: wb c <benchName> echo $WORKBENCH_ENV_NAME
+#
+workbench_OnCommand () {
+    if [[ -z "$1" ]]; then
+        log
+        log " USAGE:"
+        log "   <command> [[arg]..]"
+        log "       Executes <command> [[arg]..] inside the workbench"
+        log 
+        log " This command is implemented in: $BASH_SOURCE"
+        log
+        builtin exit 0
+    fi
+    $@
+}
+
+
+#
+#   Build a fancy PS1 that applies to all workbenches. This function could
+#   be enhanced to include git branch, status and other useful bits.
+#   WorkBench automatically stores the original PS1 in ORIG_PS1. You can
+#   continue to redefine PS1 in subsequent shelves and benches.
+#
+#   NOTE: Don't assign anything to ORIG_PS1.
+#
+ps1 () {
+
+    # ANSI colors could be defined outside in global scope too.
+    # The colors could be reused for other PS1 redeclarations if any
+    local reset="\[\033[0;0m\]"
+    local brRed="\[\033[0;91m\]"
+    local brGreen="\[\033[0;92m\]"
+    local brBlue="\[\033[0;94m\]"
+    local brMagenta="\[\033[0;95m\]"
+    local brYellow="\[\033[0;93m\]"
+    local brWhite="\[\033[0;97m\]"
+
+    # local gitIdentity=`git config --get user.email`
+    local userEmail="your-git-config-user-email@goes.here"   # dummy string
+
+    local workbenchEnv="${brRed}[ ${WORKBENCH_ENV_NAME} ]${reset}"
+    local userAtHost="${brYellow}\u${reset} at ${brMagenta}\h${reset}"
+    local identity="${brBlue}${userEmail}${reset}"
+    local prompt="${brGreen}\w${brWhite} > ${reset}"
+
+    export PS1="${workbenchEnv} | ${userAtHost} as ${identity}\n${prompt}"
+}
+
+
+#   Apply PS1 rightaway
+ps1

@@ -1,0 +1,107 @@
+#
+#   This file contains code which handles Go based projects.
+#
+#   This demo code is not feature rich, and could do with more error
+#   handling. Hopefully, it should be sufficient to explain how
+#   WorkBench could be used to handle language virtualenvs.
+
+# -----------------------------------------------------------------------------
+
+#
+#   REPO_PATH is a folder within which the actual Go projects will reside.
+#   This could be anywhere on your disk. It has no relation to the contents
+#   of your WORKBENCH_HOME. All go/<benchName> workbenches will have an
+#   associated folder inside REPO_PATH
+#
+#   For the demo, we'll consider `_gotmp` inside `WORKBENCH_HOME`
+#   go with the value below
+#
+REPO_PATH="${WORKBENCH_HOME}/_gotmp"
+
+#   GO_ENV is the folder name within REPO_PATH, which represents the
+#   go/<benchName>. Here, we are currently considering just the basename.
+#   While this shortens the path, it could cause conflicts if you have
+#   benches at different depths with the same name.
+#
+#   Example:
+#       go/abcd/viper           REPO_PATH/viper
+#       go/viper                REPO_PATH/viper
+#
+#   The fullname `WORKBENCH_ENV_NAME` or any modification thereof could
+#   also be used.
+GO_ENV="$(basename ${WORKBENCH_ENV_NAME})"
+
+#   Logger/Printer
+gowiz () { log "${HIGH}GoWiz:${RESET}" $@; }
+
+
+#
+#   Instead of implementing all the logic in workbench_OnActivate etc.,
+#   we'd instead place it in independent functions, and call these
+#   from the workbench_* functions.
+#
+#   Nested shelves, or benches could implement their own workbench_
+#   functions, which could call go_* with some wrapper code.
+#
+
+go_OnActivate () {
+    local projectPath="${REPO_PATH}/${GO_ENV}/src/${GO_URL}"
+    [[ -d "${projectPath}" ]] && cd "${projectPath}"
+    export GOPATH="${REPO_PATH}/${GO_ENV}"
+}
+
+go_OnNew () {
+    if [[ -z "$1" ]]; then
+        log
+        log "   ── [ GoWizard: Create a new Golang project ] ──"
+        log
+        log "   USAGE:"
+        log "       wb n <..go/projectName> <projectUrl> [--clone]"
+        log
+        log "   ACTIONS:"
+        log "       1. Create Go folder structure inside REPO_PATH"
+        log "       2. Clone the repo from the <projectUrl> if --clone is supplied"
+        log "       3. Write a benchFile for the <projectName>"
+        log
+        builtin exit 0
+    fi
+
+    local url="$1"
+    [[ -z "${url}" ]] && err "ERROR: Supplying a projectUrl is mandatory!" && exit 1
+    local clone="$2"
+
+    #
+    #   Ref: https://golang.org/doc/code.html#Workspaces
+    #
+
+    # [1] Create Go folders
+    local goPath="${REPO_PATH}/${GO_ENV}"
+    gowiz "Creating Go folders for ${HIGH}${WORKBENCH_ENV_NAME}${RESET} in ${REPO_PATH}"
+    mkdir -p "${goPath}" "${goPath}/bin" "${goPath}/src" "${goPath}/pkg"
+
+    # [2] Either create empty directory or clone the repo
+    if [[ -z "${clone}" ]]; then
+        gowiz "Creating project folder with URL (${url})"
+        mkdir -p "${goPath}/src/${url}"
+    else
+        gowiz "Creating project folder and cloning repo."
+        mkdir -p "$(dirname ${goPath}/src/${url})"
+        cd "$(dirname ${goPath}/src/${url})"
+        echo "----------------------------------------------------------------"
+        git clone "https://${url}"
+        echo "----------------------------------------------------------------"
+    fi
+
+    # [3] Write contents for the new benchFile
+    local benchFile="${WORKBENCH_HOME}/${WORKBENCH_ENV_NAME}.${WORKBENCH_BENCH_EXTN}"
+    gowiz "Writing contents to the bench: ${benchFile}"
+    if [[ -f "${benchFile}" ]] && [[ ! -s "${benchFile}" ]]; then
+        echo "GO_URL=${url}" > "${benchFile}"
+    fi
+
+    gowiz "Done. Run '${HIGH}wb a ${WORKBENCH_ENV_NAME}${RESET}' to activate this workbench."
+}
+
+
+workbench_OnActivate () { go_OnActivate $@; }
+workbench_OnNew () { go_OnNew $@; }

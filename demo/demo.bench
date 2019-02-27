@@ -1,0 +1,38 @@
+WHITE="\033[0;93m"
+RESET="\033[0;0m"
+
+workbench_OnActivate () {
+    demo ""
+    demo "    ╔═╗       ┌─────╔═╗"
+    demo "    ╙ W 0 R K B E N C H"
+    demo ""
+    demo "    Welcome to WorkBench. This is a demo."
+    demo ""
+    demo " ─────────────────────────────────────────────────────────────────────────"
+    demo ""
+    demo "    You are currently able to see this text because you have"
+    demo "    WORKBENCH_DEMO environment variable set."
+    demo ""
+    demo "    1. Your current WORKBENCH_HOME is: ${HIGH}${WORKBENCH_HOME}${RESET}"
+    demo "    2. The text you see here is from ${HIGH}WORKBENCH_HOME/demo.bench${RESET}"
+    demo "    3. You might have also noticed that the PS1 has changed."
+    demo "       The code for that is in ${HIGH}WORKBENCH_HOME/wb.shelf${RESET}"
+    demo "    4. Type '${HIGH}exit${RESET}' to exit from this workbench to your parent shell."
+    demo "       'exit' has been overridden to print some messages before you actually exit."
+    demo ""
+}
+
+exit () {
+    if [[ $- == *i* ]]; then     # print in interactive (activate) mode
+        demo
+        demo "--- [ deactivation demo ] ---------------------------------------------------"
+        demo " The lines you see here are being printed from WORKBENCH_HOME/demo.bench"
+        demo " A function named 'exit' has been declared, and implements the code which"
+        demo " prints these lines."
+        demo
+        demo " This is followed by calling 'builtin exit' to actually exit the environment"
+        demo "-----------------------------------------------------------------------------"
+        demo
+    fi
+    builtin exit 2> /dev/null
+}
