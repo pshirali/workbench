@@ -157,6 +157,16 @@ Executing `workbench` environments -- [``wb a``, ``wb r``, ``wb n``]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+The `workbench` stores the execution command in the varible
+``WORKBENCH_EXEC_MODE``. `Shelf` and `Bench` code could take decisions
+based on this value.
+
+A no-op function ``workbench_pre_execute_hook`` executes just before
+a `workbench` is built. This function could be implemented by the
+``WORKBENCH_RC`` with logic that decides whether to go ahead with
+execution. Refer to the `Security` chapter for more details.
+
+
 Activate -- [``wb a``]
 ----------------------
 
@@ -203,8 +213,8 @@ used to trigger different functionality.
 New -- [``wb n``]
 -----------------
 
-The `new` command is a variant of the `command` command. It's execution is
-similar to that of the `command` command (non-interactive), but with
+The `new` command is a variant of the `run` command. It's execution is
+similar to that of the `run` command (non-interactive), but with
 ``WORKBENCH_NEW_FUNC`` as the entrypoint.
 
 When the command ``wb n <newBenchName>`` is invoked, WorkBench creates
