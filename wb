@@ -386,7 +386,7 @@ _wb_compose_code () {
     _wb_compose_source   "${resourceFile}"
 
     # execution mode
-    echo "WORKBENCH_EXEC_MODE=${cmd}"
+    echo "export WORKBENCH_EXEC_MODE=${cmd}"
 
     # entrypoint
     case "${cmd}" in

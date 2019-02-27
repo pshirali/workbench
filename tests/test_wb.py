@@ -471,6 +471,7 @@ class TestWbExecute(unittest.TestCase):
             "export WORKBENCH_ACTIVATE_FUNC=",
             "export WORKBENCH_RUN_FUNC=",
             "export WORKBENCH_NEW_FUNC=",
+            "export WORKBENCH_EXEC_MODE=",
         ]
         o = run("WORKBENCH_ENV_NAME= WORKBENCH_HOME={td}/wbhome/simple "
                 "{wb} r --dump outer/inner/simple1")
