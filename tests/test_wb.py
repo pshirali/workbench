@@ -630,7 +630,7 @@ class TestWbExecute(unittest.TestCase):
         """
         for cmd in ["a", "c", "n"]:
             o = run("WORKBENCH_ACTIVATE_CMD='{executor} -c' "
-                    "WORKBENCH_HOME={td}/execmode wb {cmd} execmode",
+                    "WORKBENCH_HOME={td}/execmode {wb} {cmd} execmode",
                     replace=dict(cmd=cmd, executor=EXECUTOR))
             self.assertEqual(o.stderr, "")
             self.assertEqual(o.returncode, 0)
