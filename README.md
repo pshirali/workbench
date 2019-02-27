@@ -1,8 +1,12 @@
 # WorkBench
 
-[![CircleCI](https://circleci.com/gh/pshirali/workbench.svg?style=shield)](https://circleci.com/gh/pshirali/workbench) | Status: `Alpha` | Docs: [wb.rtfd.io](https://wb.rtfd.io)
+[![CircleCI](https://circleci.com/gh/pshirali/workbench.svg?style=shield)](https://circleci.com/gh/pshirali/workbench)
 
-![WorkBench Logo](docs/source/_static/logo-black.png)
+Status: `Alpha` | Docs: [`wb.rtfd.io`](https://wb.rtfd.io)
+
+<p align="center">
+  <img width="460" src="https://github.com/pshirali/workbench/blob/master/docs/source/_static/logo-black.png">
+</p>
 
 WorkBench is a hierarchical environment manager for \*nix shells. It sources
 shell-code distributed across multiple levels of a folder hierarchy and
