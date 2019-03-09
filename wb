@@ -363,14 +363,16 @@ _wb_compose_source () {
         chain="${chain}${root}/${WORKBENCH_SHELF_FILE}:"
     fi
 
-    for part in $(set -f; IFS=/; printf "%s\n" ${srcDir}); do
-        root="${root}/${part}"
-        local shelfFile="${root}/${WORKBENCH_SHELF_FILE}"
-        if [[ -f "${shelfFile}" ]]; then
-            printf "source \"${shelfFile}\"\n"
-            chain="${chain}${shelfFile}:"
-        fi
-    done
+    if [[ "${srcDir}" != "." ]]; then
+        for part in $(set -f; IFS=/; printf "%s\n" ${srcDir}); do
+            root="${root}/${part}"
+            local shelfFile="${root}/${WORKBENCH_SHELF_FILE}"
+            if [[ -f "${shelfFile}" ]]; then
+                printf "source \"${shelfFile}\"\n"
+                chain="${chain}${shelfFile}:"
+            fi
+        done
+    fi
 
     printf "source \"${resourceFile}\"\n"
     chain="${chain}${resourceFile}"
