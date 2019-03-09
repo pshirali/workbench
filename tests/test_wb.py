@@ -532,6 +532,22 @@ class TestWbExecute(unittest.TestCase):
             pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
             self.assertEqual(pt, source_list)
 
+    def test_ISSUE_11_workbench_shelf_sourced_twice(self):
+        """
+        https://github.com/pshirali/workbench/issues/11
+        Dont source wb.shelf twice if bench is in WORKBENCH_HOME
+        """
+        o = run("WORKBENCH_ENV_NAME= "
+                "WORKBENCH_HOME={td}/wbhome/chain/shelfbench "
+                "WORKBENCH_RUN_FUNC=echo "
+                "{wb} r bench \$WORKBENCH_CHAIN")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
+        hm = join(TESTDATA, "wbhome", "chain", "shelfbench")
+        stdout = o.stdout.strip().split()[-1]       # tail -n 1
+        pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
+        self.assertEqual(pt, ["/wb.shelf", "/bench.bench"])
+
     def test_invoke_run_on_bench(self):
         """
         wb r <benchName>
