@@ -548,6 +548,26 @@ class TestWbExecute(unittest.TestCase):
         pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
         self.assertEqual(pt, ["/wb.shelf", "/bench.bench"])
 
+    def test_workbench_chain_contents_on_new_strip_colon(self):
+        """
+        'wb n <nonExistentBench>' will allow workbench_OnNew from a shelf
+        to execute. This is a case where the benchFile for <nonExistentBencH>
+        doesn't exist yet. In this scenario WORKBENCH_CHAIN must not have
+        a trailing colon.
+        """
+        o = run("WORKBENCH_ENV_NAME= "
+                "WORKBENCH_HOME={td}/wbhome/chain/skipshelf "
+                "WORKBENCH_NEW_FUNC=echo "
+                "{wb} n does-not-exist \$WORKBENCH_CHAIN")
+        self.assertEqual(o.stderr, "")
+        self.assertEqual(o.returncode, 0)
+        hm = join(TESTDATA, "wbhome", "chain", "skipshelf")
+        stdout = o.stdout.strip().split()[-1]       # tail -n 1
+
+        self.assertNotEqual(stdout[-1], ":")
+        pt = [p[len(hm):] for p in stdout.split(":") if p.startswith(hm)]
+        self.assertEqual(pt, ["/wb.shelf"])
+
     def test_invoke_run_on_bench(self):
         """
         wb r <benchName>
