@@ -51,6 +51,7 @@ vanilla \*nix systems.
 
    devnotes/contrib.rst
    devnotes/testing.rst
+   devnotes/release.rst
    devnotes/license.rst
 
 

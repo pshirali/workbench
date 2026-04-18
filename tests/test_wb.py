@@ -643,6 +643,41 @@ class TestWbExecute(unittest.TestCase):
         finally:
             shutil.rmtree(rm_test_dir)
 
+    def test_default_workbench_new_creates_file_under_workbench_home(self):
+        """
+        wb n <newBench> with the default (auto-generated) workbench_OnNew
+        must create the bench file at '<WORKBENCH_HOME>/<newBench>.bench',
+        not at a path relative to the current working directory.
+        """
+        rm_test_dir = join(TESTDATA, "wbhome/rm_test_default_new")
+        stray_dir = join(WB_DIR, "nested")
+        try:
+            if exists(rm_test_dir) and isdir(rm_test_dir):
+                shutil.rmtree(rm_test_dir)
+            makedirs(rm_test_dir, exist_ok=True)
+
+            o = run("WORKBENCH_ENV_NAME= "
+                    "WORKBENCH_HOME={td}/wbhome/rm_test_default_new "
+                    "{wb} n nested/new_one")
+            self.assertEqual(o.stderr, "")
+            self.assertEqual(o.returncode, 0)
+
+            expected_bench = join(rm_test_dir, "nested", "new_one.bench")
+            self.assertTrue(
+                exists(expected_bench),
+                "Expected bench file at {}".format(expected_bench)
+            )
+            self.assertFalse(
+                exists(stray_dir),
+                "Default workbench_OnNew leaked a relative path: {}".format(
+                    stray_dir)
+            )
+        finally:
+            if exists(rm_test_dir):
+                shutil.rmtree(rm_test_dir)
+            if exists(stray_dir):
+                shutil.rmtree(stray_dir)
+
     def test_realpath_prevents_sourcing_outside_of_workbench_home(self):
         """
         With 'realpath' is found on the system, paths which try to source
