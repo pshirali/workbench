@@ -5,7 +5,7 @@ This page tracks released versions of WorkBench along with the notable changes
 in each release. Dates follow the ``YYYY-MM-DD`` format.
 
 
-0.1.1 (unreleased)
+0.1.1 (2026-04-18)
 ~~~~~~~~~~~~~~~~~~
 
 Bug fixes
